@@ -6,17 +6,33 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  const token = localStorage.getItem('foresight_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
   const res = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      ...headers,
       ...options?.headers,
     },
     ...options,
   });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(error.detail || error.message || `Request failed: ${res.status}`);
+    let errorMessage = `Request failed: ${res.status}`;
+    try {
+      const error = await res.json();
+      errorMessage = error.detail || error.message || errorMessage;
+    } catch {
+      // Ignored
+    }
+    throw new Error(errorMessage);
   }
 
   return res.json();
@@ -41,4 +57,21 @@ export const api = {
   /** Health check */
   healthCheck: () =>
     request<Record<string, unknown>>('/api/v1/health'),
+
+  /** Auth Register */
+  register: (data: Record<string, string>) => 
+    request<any>('/api/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /** Auth Login */
+  login: (data: Record<string, string>) => 
+    request<any>('/api/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    
+  /** Auth Get Profile */
+  getProfile: () => request<any>('/api/v1/auth/me'),
 };

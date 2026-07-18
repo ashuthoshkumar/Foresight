@@ -1,14 +1,17 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ImpactAxis } from '../scenario/types';
 import { CATEGORY_META } from '../scenario/types';
 
 interface RadarChartProps {
   impacts: ImpactAxis[];
+  impactsB?: ImpactAxis[];
   size?: number;
 }
 
-export default function RadarChart({ impacts, size = 300 }: RadarChartProps) {
+export default function RadarChart({ impacts, impactsB, size = 300 }: RadarChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,7 +27,7 @@ export default function RadarChart({ impacts, size = 300 }: RadarChartProps) {
 
     const cx = size / 2;
     const cy = size / 2;
-    const maxRadius = size * 0.38;
+    const maxRadius = size * 0.30;
     const categories: Array<keyof typeof CATEGORY_META> = [
       'financial', 'environmental', 'human', 'risks', 'opportunities',
     ];
@@ -68,65 +71,83 @@ export default function RadarChart({ impacts, size = 300 }: RadarChartProps) {
       const impact = impacts.find(i => i.category === cat);
       return impact ? impact.score / 100 : 0;
     });
+    
+    const scoresB = impactsB ? categories.map(cat => {
+      const impact = impactsB.find(i => i.category === cat);
+      return impact ? impact.score / 100 : 0;
+    }) : null;
 
     // Animate fill
     const animateFrame = (progress: number) => {
       // Clear the data area only
       ctx.save();
-
-      // Draw filled area
-      ctx.beginPath();
-      for (let i = 0; i <= n; i++) {
-        const idx = i % n;
-        const angle = startAngle + angleStep * idx;
-        const r = maxRadius * scores[idx] * progress;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-
-      // Gradient fill
-      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxRadius);
-      gradient.addColorStop(0, 'rgba(0, 212, 255, 0.25)');
-      gradient.addColorStop(0.5, 'rgba(124, 58, 237, 0.15)');
-      gradient.addColorStop(1, 'rgba(0, 212, 255, 0.05)');
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      // Border
-      ctx.strokeStyle = 'rgba(0, 212, 255, 0.6)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Data points
-      for (let i = 0; i < n; i++) {
-        const angle = startAngle + angleStep * i;
-        const r = maxRadius * scores[i] * progress;
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-
-        // Glow
+      
+      const drawSeries = (seriesScores: number[], isSecondary: boolean) => {
         ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+        for (let i = 0; i <= n; i++) {
+          const idx = i % n;
+          const angle = startAngle + angleStep * idx;
+          const r = maxRadius * seriesScores[idx] * progress;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+
+        // Gradient fill
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxRadius);
+        if (isSecondary) {
+          gradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)'); // Amber
+          gradient.addColorStop(1, 'rgba(245, 158, 11, 0.05)');
+        } else {
+          gradient.addColorStop(0, 'rgba(0, 212, 255, 0.25)'); // Cyan/Blue
+          gradient.addColorStop(0.5, 'rgba(124, 58, 237, 0.15)');
+          gradient.addColorStop(1, 'rgba(0, 212, 255, 0.05)');
+        }
+        ctx.fillStyle = gradient;
         ctx.fill();
 
-        // Point
-        ctx.beginPath();
-        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = CATEGORY_META[categories[i]].color;
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1.5;
+        // Border
+        ctx.strokeStyle = isSecondary ? 'rgba(245, 158, 11, 0.6)' : 'rgba(0, 212, 255, 0.6)';
+        ctx.lineWidth = 2;
         ctx.stroke();
+
+        // Data points
+        for (let i = 0; i < n; i++) {
+          const angle = startAngle + angleStep * i;
+          const r = maxRadius * seriesScores[i] * progress;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+
+          // Glow
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = isSecondary ? 'rgba(245, 158, 11, 0.2)' : 'rgba(0, 212, 255, 0.2)';
+          ctx.fill();
+
+          // Point
+          ctx.beginPath();
+          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+          // Only show category color for the primary series to avoid confusion, or use specific colors
+          ctx.fillStyle = isSecondary ? '#f59e0b' : CATEGORY_META[categories[i]].color;
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      };
+
+      // Draw series B first so series A overlays on top
+      if (scoresB) {
+        drawSeries(scoresB, true);
       }
+      drawSeries(scores, false);
 
       // Labels
       for (let i = 0; i < n; i++) {
         const angle = startAngle + angleStep * i;
-        const labelR = maxRadius + 28;
+        const labelR = maxRadius + 32;
         const x = cx + labelR * Math.cos(angle);
         const y = cy + labelR * Math.sin(angle);
 
@@ -141,9 +162,9 @@ export default function RadarChart({ impacts, size = 300 }: RadarChartProps) {
         // Label text
         ctx.font = '600 10px Inter, sans-serif';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.fillText(CATEGORY_META[categories[i]].label, x, y + 8);
+        ctx.fillText(t(`categories.${categories[i]}`), x, y + 8);
 
-        // Score
+        // Score (Only show primary score in labels to avoid clutter)
         ctx.font = '700 10px Inter, sans-serif';
         ctx.fillStyle = CATEGORY_META[categories[i]].color;
         const score = Math.round(scores[i] * 100 * progress);
@@ -200,7 +221,7 @@ export default function RadarChart({ impacts, size = 300 }: RadarChartProps) {
     };
 
     requestAnimationFrame(animate);
-  }, [impacts, size]);
+  }, [impacts, impactsB, size, t]);
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '8px' }}>

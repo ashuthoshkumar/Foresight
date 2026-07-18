@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './LoadingState.css';
 
-const STEPS = [
-  { label: 'Interpreting your scenario…', icon: '🧠' },
-  { label: 'Querying knowledge graph…', icon: '🔍' },
-  { label: 'Running calculations…', icon: '📊' },
-  { label: 'Generating AI analysis…', icon: '🤖' },
-  { label: 'Compiling results…', icon: '✨' },
-];
-
 export default function LoadingState() {
+  const { t } = useTranslation();
+  
+  const STEPS = [
+    { label: t('loading.steps.s1'), icon: '🧠' },
+    { label: t('loading.steps.s2'), icon: '🔍' },
+    { label: t('loading.steps.s3'), icon: '📊' },
+    { label: t('loading.steps.s4'), icon: '🤖' },
+    { label: t('loading.steps.s5'), icon: '✨' },
+  ];
+
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
@@ -29,9 +32,9 @@ export default function LoadingState() {
       </div>
 
       <div className="loading-state__text">
-        <div className="loading-state__title">Simulating Future Outcomes</div>
+        <div className="loading-state__title">{t('loading.title')}</div>
         <div className="loading-state__subtitle">
-          Our AI is analyzing your scenario across financial, environmental, human, risk, and opportunity dimensions.
+          {t('loading.subtitle')}
         </div>
       </div>
 

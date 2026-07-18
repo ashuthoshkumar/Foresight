@@ -39,6 +39,7 @@ class SimulationEngine:
         self,
         query: str,
         parameters: Optional[dict[str, Any]] = None,
+        language: str = "en",
     ) -> SimulationResult:
         """
         Run a full simulation for the given scenario.
@@ -46,6 +47,8 @@ class SimulationEngine:
         Args:
             query: Natural language scenario description
             parameters: Optional parameter overrides
+            language: Language code for the output
+
 
         Returns:
             Complete SimulationResult with all 5 impact axes
@@ -82,10 +85,11 @@ class SimulationEngine:
             query=query,
             kg_data=kg_calculations,
             interpreted_params=interpreted,
+            language=language,
         )
 
         # Step 5: Build structured result
-        impacts = self._build_impacts(llm_analysis.get("impacts", []))
+        impacts = self._build_impacts(llm_analysis.get("impacts", []), language)
         overall_summary = llm_analysis.get("overall_summary", "Analysis complete.")
         overall_score = llm_analysis.get("overall_score", 50.0)
 
@@ -115,9 +119,19 @@ class SimulationEngine:
 
         return result
 
-    def _build_impacts(self, raw_impacts: list[dict[str, Any]]) -> list[ImpactAxis]:
+    def _build_impacts(self, raw_impacts: list[dict[str, Any]], language: str = "en") -> list[ImpactAxis]:
         """Convert raw LLM/fallback analysis into typed ImpactAxis models."""
         impacts = []
+
+        is_hi = language.lower() == 'hi'
+        is_te = language.lower() == 'te'
+        
+        def t_missing(cat_val: str) -> str:
+            if is_hi:
+                return f"{cat_val} के लिए कोई विशिष्ट विश्लेषण उपलब्ध नहीं है"
+            if is_te:
+                return f"{cat_val} కోసం ప్రత్యేక విశ్లేషణ ఏదీ అందుబాటులో లేదు"
+            return f"No specific analysis available for {cat_val}"
 
         for raw in raw_impacts:
             try:
@@ -161,7 +175,7 @@ class SimulationEngine:
                 impacts.append(ImpactAxis(
                     category=cat,
                     score=50.0,
-                    summary=f"No specific analysis available for {cat.value}",
+                    summary=t_missing(cat.value),
                     details=[],
                     data_source=DataSource.LLM_ESTIMATE,
                 ))

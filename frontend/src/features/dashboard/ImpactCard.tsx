@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ImpactAxis } from '../scenario/types';
 import { CATEGORY_META } from '../scenario/types';
 import CredibilityBadge from './CredibilityBadge';
@@ -10,6 +11,7 @@ interface ImpactCardProps {
 }
 
 export default function ImpactCard({ impact, index }: ImpactCardProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const meta = CATEGORY_META[impact.category];
 
@@ -28,7 +30,7 @@ export default function ImpactCard({ impact, index }: ImpactCardProps) {
             {meta.icon}
           </div>
           <span className="impact-card__category" style={{ color: meta.color }}>
-            {meta.label}
+            {t(`categories.${impact.category}`)}
           </span>
         </div>
         <div className="impact-card__score-container">
@@ -65,7 +67,7 @@ export default function ImpactCard({ impact, index }: ImpactCardProps) {
               <div className="impact-card__detail-explanation">{detail.explanation}</div>
               <div className="impact-card__detail-footer">
                 <span className={`impact-card__confidence impact-card__confidence--${detail.confidence}`}>
-                  {detail.confidence} confidence
+                  {detail.confidence} {t('common.confidence')}
                 </span>
                 <CredibilityBadge source={detail.source} compact />
               </div>
@@ -76,7 +78,7 @@ export default function ImpactCard({ impact, index }: ImpactCardProps) {
 
       {impact.details.length > 0 && (
         <div className="impact-card__expand-hint">
-          {expanded ? '▲ Click to collapse' : `▼ ${impact.details.length} metrics — click to expand`}
+          {expanded ? t('history.clickCollapse') : t('history.clickExpand', { count: impact.details.length })}
         </div>
       )}
     </div>

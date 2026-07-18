@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { DataSource } from '../scenario/types';
 
 interface CredibilityBadgeProps {
@@ -6,6 +7,7 @@ interface CredibilityBadgeProps {
 }
 
 export default function CredibilityBadge({ source, compact = false }: CredibilityBadgeProps) {
+  const { t } = useTranslation();
   const isKG = source === 'knowledge_graph';
 
   const style: React.CSSProperties = {
@@ -24,11 +26,11 @@ export default function CredibilityBadge({ source, compact = false }: Credibilit
   };
 
   return (
-    <span style={style} title={isKG ? 'Calculated from real-world data' : 'AI-generated directional estimate'}>
+    <span style={style} title={isKG ? t('common.kgDesc') : t('common.aiDesc')}>
       <span style={{ fontSize: compact ? '0.7rem' : '0.8rem' }}>
         {isKG ? '🟢' : '🟡'}
       </span>
-      {isKG ? 'Data-Grounded' : 'AI Estimate'}
+      {isKG ? t('common.kg') : t('common.aiEstimate')}
     </span>
   );
 }

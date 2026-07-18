@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { SimulationResult } from '../scenario/types';
 import { CATEGORY_META } from '../scenario/types';
 import { timeAgo } from '../../utils/formatters';
@@ -9,17 +10,19 @@ interface HistoryProps {
 }
 
 export default function History({ scenarios, onSelect }: HistoryProps) {
+  const { t } = useTranslation();
+
   if (scenarios.length === 0) {
     return (
       <div className="history container">
         <div className="history__header">
-          <h2 className="history__title">📋 Scenario History</h2>
+          <h2 className="history__title">{t('history.title')}</h2>
         </div>
         <div className="history__empty">
           <div className="history__empty-icon">🔮</div>
-          <div className="history__empty-text">No scenarios yet</div>
+          <div className="history__empty-text">{t('history.noScenariosYet')}</div>
           <div className="history__empty-hint">
-            Run your first simulation to see it here!
+            {t('history.runFirstSimulation')}
           </div>
         </div>
       </div>
@@ -36,8 +39,8 @@ export default function History({ scenarios, onSelect }: HistoryProps) {
   return (
     <div className="history container">
       <div className="history__header">
-        <h2 className="history__title">📋 Scenario History</h2>
-        <span className="history__count">{scenarios.length} scenarios</span>
+        <h2 className="history__title">{t('history.title')}</h2>
+        <span className="history__count">{scenarios.length} {t('history.scenariosCount')}</span>
       </div>
 
       <div className="history__list stagger-children">

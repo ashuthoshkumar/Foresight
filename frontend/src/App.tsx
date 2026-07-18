@@ -1,27 +1,37 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import AnimatedBackground from './features/shared/AnimatedBackground';
 import Navbar from './features/shared/Navbar';
+import Sidebar from './features/shared/Sidebar';
 import LoadingState from './features/shared/LoadingState';
 import ScenarioInput from './features/scenario/ScenarioInput';
 import Dashboard from './features/dashboard/Dashboard';
+import CompareDashboard from './features/dashboard/CompareDashboard';
 import History from './features/history/History';
 import { api } from './api/client';
 import type { SimulationResult } from './features/scenario/types';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
+import AuthModal from './features/auth/AuthModal';
+import LandingPage from './features/landing/LandingPage';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare';
 
-export default function App() {
+function AppContent() {
   const [view, setView] = useState<View>('home');
   const [currentResult, setCurrentResult] = useState<SimulationResult | null>(null);
+  const [comparisonResults, setComparisonResults] = useState<[SimulationResult, SimulationResult] | null>(null);
   const [history, setHistory] = useState<SimulationResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { i18n } = useTranslation();
 
   const handleSimulate = useCallback(async (query: string) => {
     setView('loading');
     setError(null);
+    setIsSidebarOpen(false);
 
     try {
-      const response = await api.simulate({ query });
+      const response = await api.simulate({ query, language: i18n.language });
       if (response.success && response.result) {
         setCurrentResult(response.result);
         setHistory(prev => [response.result, ...prev]);
@@ -33,98 +43,184 @@ export default function App() {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(message);
       setView('home');
+      setIsSidebarOpen(true);
     }
-  }, []);
+  }, [i18n.language]);
+
+  const handleCompare = useCallback(async (queryA: string, queryB: string) => {
+    setView('loading');
+    setError(null);
+    setIsSidebarOpen(false);
+
+    try {
+      const [resA, resB] = await Promise.all([
+        api.simulate({ query: queryA, language: i18n.language }),
+        api.simulate({ query: queryB, language: i18n.language })
+      ]);
+
+      if (resA.success && resA.result && resB.success && resB.result) {
+        setComparisonResults([resA.result, resB.result]);
+        setHistory(prev => [resB.result, resA.result, ...prev]);
+        setView('compare_dashboard');
+      } else {
+        throw new Error(resA.message || resB.message || 'Comparison simulation failed');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred during comparison';
+      setError(message);
+      setView('home');
+      setIsSidebarOpen(true);
+    }
+  }, [i18n.language]);
 
   const handleBack = useCallback(() => {
     setView('home');
     setCurrentResult(null);
+    setComparisonResults(null);
     setError(null);
+    setIsSidebarOpen(true);
   }, []);
 
   const handleSelectHistory = useCallback((result: SimulationResult) => {
     setCurrentResult(result);
     setView('dashboard');
+    setIsSidebarOpen(false);
   }, []);
 
-  const handleViewChange = useCallback((v: 'home' | 'history') => {
+  const handleViewChange = useCallback((v: 'home' | 'history' | 'compare') => {
     setView(v);
-    if (v === 'home') {
+    if (v === 'home' || v === 'compare') {
       setCurrentResult(null);
+      setComparisonResults(null);
       setError(null);
+    }
+    // Only close if it's not home or compare (like if they click history, keep it open so they can see history)
+    if (v !== 'home' && v !== 'history' && v !== 'compare') {
+        setIsSidebarOpen(false);
+    } else {
+        setIsSidebarOpen(true);
     }
   }, []);
 
   return (
     <>
-      <AnimatedBackground />
-      <Navbar
-        currentView={view === 'history' ? 'history' : 'home'}
-        onViewChange={handleViewChange}
-        historyCount={history.length}
+      <Sidebar 
+        currentView={view} 
+        onViewChange={handleViewChange} 
+        historyCount={history.length} 
+        isOpen={isSidebarOpen}
       />
 
-      <main style={{ flex: 1 }}>
-        {/* Error toast */}
-        {error && (
-          <div style={{
-            maxWidth: '600px',
-            margin: '1rem auto',
-            padding: '12px 20px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: '12px',
-            color: '#ef4444',
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            animation: 'fadeIn 0.3s ease-out',
-          }}>
-            <span>⚠️ {error}</span>
-            <button
-              onClick={() => setError(null)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#ef4444',
-                cursor: 'pointer',
-                fontSize: '1.1rem',
-                padding: '0 4px',
-              }}
-            >
-              ×
-            </button>
-          </div>
-        )}
+      <div className="app-content">
+        <Navbar 
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+        />
 
-        {view === 'home' && (
-          <ScenarioInput onSubmit={handleSimulate} isLoading={false} />
-        )}
+        <main style={{ flex: 1, position: 'relative', zIndex: 1, padding: '2rem 0' }}>
+          {error && (
+            <div style={{
+              maxWidth: '600px',
+              margin: '0 auto 1rem',
+              padding: '12px 20px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius: '12px',
+              color: '#ef4444',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              animation: 'fadeIn 0.3s ease-out',
+            }}>
+              <span>⚠️ {error}</span>
+              <button
+                onClick={() => setError(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  fontSize: '1.1rem',
+                  padding: '0 4px',
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
 
-        {view === 'loading' && <LoadingState />}
+          {(view === 'home' || view === 'compare') && (
+            <ScenarioInput key={view} onSubmit={handleSimulate} onCompare={handleCompare} isLoading={false} initialCompareMode={view === 'compare'} />
+          )}
 
-        {view === 'dashboard' && currentResult && (
-          <Dashboard result={currentResult} onBack={handleBack} />
-        )}
+          {view === 'loading' && <LoadingState />}
 
-        {view === 'history' && (
-          <History scenarios={history} onSelect={handleSelectHistory} />
-        )}
-      </main>
+          {view === 'dashboard' && currentResult && (
+            <Dashboard result={currentResult} onBack={handleBack} />
+          )}
 
-      {/* Footer */}
-      <footer style={{
-        textAlign: 'center',
-        padding: '2rem 1rem',
-        color: 'var(--text-tertiary)',
-        fontSize: '0.78rem',
-        borderTop: '1px solid var(--border-subtle)',
-      }}>
-        <span style={{ opacity: 0.6 }}>
-          Foresight AI Decision Engine — Powered by Gemini + Knowledge Graph
-        </span>
-      </footer>
+          {view === 'compare_dashboard' && comparisonResults && (
+            <CompareDashboard resultA={comparisonResults[0]} resultB={comparisonResults[1]} onBack={handleBack} />
+          )}
+
+          {view === 'history' && (
+            <History scenarios={history} onSelect={handleSelectHistory} />
+          )}
+        </main>
+
+        <footer style={{
+          textAlign: 'center',
+          padding: '2rem 1rem',
+          color: 'var(--text-tertiary)',
+          fontSize: '0.78rem',
+          borderTop: '1px solid var(--border-subtle)',
+          position: 'relative',
+          zIndex: 1,
+        }}>
+          <span style={{ opacity: 0.6 }}>
+            Foresight AI Decision Engine — Powered by Gemini + Knowledge Graph
+          </span>
+        </footer>
+      </div>
     </>
+  );
+}
+
+function MainApp() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [authModalState, setAuthModalState] = useState<{isOpen: boolean; mode: 'login' | 'register'}>({
+    isOpen: false,
+    mode: 'login'
+  });
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  return (
+    <>
+      <AnimatedBackground />
+      {!isAuthenticated ? (
+        <LandingPage onOpenAuth={(mode) => setAuthModalState({ isOpen: true, mode })} />
+      ) : (
+        <AppContent />
+      )}
+      
+      <AuthModal 
+        isOpen={authModalState.isOpen} 
+        onClose={() => setAuthModalState(prev => ({ ...prev, isOpen: false }))} 
+        // We can pass initial mode if we want, but AuthModal currently manages its own mode.
+        // For simplicity, we just open it. It defaults to 'login'.
+      />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

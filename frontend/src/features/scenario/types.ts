@@ -47,6 +47,7 @@ export interface HistoryResponse {
 export interface ScenarioRequest {
   query: string;
   parameters?: Record<string, unknown>;
+  language?: string;
 }
 
 /* Category metadata for UI rendering */

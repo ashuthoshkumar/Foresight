@@ -94,7 +94,6 @@
   width: 100%;
   min-height: 120px;
   padding: var(--space-lg) var(--space-xl);
-  padding-bottom: 70px;
   background: var(--bg-card);
   backdrop-filter: blur(20px);
   border: none;
@@ -116,10 +115,6 @@
 }
 
 .scenario-input__actions {
-  position: absolute;
-  bottom: var(--space-md);
-  left: var(--space-md);
-  right: var(--space-md);
   display: flex;
   align-items: center;
   justify-content: space-between;

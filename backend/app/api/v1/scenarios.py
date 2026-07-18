@@ -1,6 +1,7 @@
 """Scenario simulation API endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from typing import Optional, Dict, Any
+from fastapi import APIRouter, HTTPException, Depends
 
 from app.models.scenario import (
     ErrorResponse,
@@ -9,16 +10,19 @@ from app.models.scenario import (
     SimulationResponse,
 )
 from app.services.simulation import simulation_engine
+from app.api.v1.middleware import get_optional_user
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
-
 
 @router.post(
     "/simulate",
     response_model=SimulationResponse,
     responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}},
 )
-async def simulate_scenario(request: ScenarioRequest):
+async def simulate_scenario(
+    request: ScenarioRequest,
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
     """
     Simulate a "What If" scenario.
 
@@ -27,9 +31,14 @@ async def simulate_scenario(request: ScenarioRequest):
     opportunity axes.
     """
     try:
+        parameters = request.parameters or {}
+        if current_user:
+            parameters["user_email"] = current_user["email"]
+            
         result = await simulation_engine.simulate(
             query=request.query,
-            parameters=request.parameters,
+            parameters=parameters,
+            language=request.language,
         )
         return SimulationResponse(result=result)
     except ValueError as e:

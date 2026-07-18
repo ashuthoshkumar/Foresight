@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     debug: bool = True
     app_name: str = "Foresight"
     app_version: str = "0.1.0"
+    
+    # JWT Auth
+    jwt_secret_key: str = "your-super-secret-key-change-in-production"
+    jwt_expiry_minutes: int = 1440 # 24 hours
 
     @property
     def cors_origin_list(self) -> list[str]:

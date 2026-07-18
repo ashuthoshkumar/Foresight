@@ -48,6 +48,10 @@ class ScenarioRequest(BaseModel):
         default_factory=dict,
         description="Optional parameter overrides for the simulation",
     )
+    language: str = Field(
+        default="en",
+        description="Language code for the output (e.g. 'en', 'hi', 'te')"
+    )
 
 
 # ── Response Models ─────────────────────────────────────────────
