@@ -1,0 +1,116 @@
+/* ── Loading State ───────────────────────────────────────────── */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-xl);
+  gap: var(--space-xl);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.loading-state__orb-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.loading-state__orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  opacity: 0.15;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-state__ring {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-primary);
+  border-right-color: var(--accent-secondary);
+  animation: spin 1.5s linear infinite;
+}
+
+.loading-state__ring--inner {
+  inset: 22px;
+  border-top-color: var(--accent-secondary);
+  border-right-color: var(--accent-primary);
+  animation-direction: reverse;
+  animation-duration: 1s;
+}
+
+.loading-state__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.loading-state__text {
+  text-align: center;
+}
+
+.loading-state__title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.loading-state__subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+/* Steps indicator */
+.loading-state__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 400px;
+}
+
+.loading-state__step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  transition: all var(--transition-base);
+}
+
+.loading-state__step--done {
+  color: var(--accent-success);
+  opacity: 0.8;
+}
+
+.loading-state__step--active {
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.loading-state__step--pending {
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.loading-state__step-icon {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.loading-state__step--active .loading-state__step-icon {
+  animation: pulse 1s ease-in-out infinite;
+}

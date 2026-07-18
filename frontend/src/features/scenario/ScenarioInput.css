@@ -1,0 +1,220 @@
+/* ── Scenario Input ─────────────────────────────────────────── */
+
+.scenario-input {
+  padding: var(--space-3xl) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeInUp 0.7s ease-out;
+}
+
+.scenario-input__hero {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+  max-width: 700px;
+}
+
+.scenario-input__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent-primary);
+  margin-bottom: var(--space-lg);
+  letter-spacing: 0.02em;
+}
+
+.scenario-input__badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.scenario-input__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: var(--space-md);
+  letter-spacing: -0.03em;
+}
+
+.scenario-input__subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* Input area */
+.scenario-input__form {
+  width: 100%;
+  max-width: 720px;
+  position: relative;
+}
+
+.scenario-input__input-wrapper {
+  position: relative;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.scenario-input__input-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(124, 58, 237, 0.3), rgba(0, 212, 255, 0.3));
+  background-size: 200% 200%;
+  animation: shimmer 3s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity var(--transition-base);
+}
+
+.scenario-input__input-wrapper:focus-within::before {
+  opacity: 1;
+  animation: shimmer 2s linear infinite, glow 2s ease-in-out infinite;
+}
+
+.scenario-input__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-lg) var(--space-xl);
+  padding-bottom: 70px;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  resize: none;
+  transition: all var(--transition-base);
+}
+
+.scenario-input__textarea::placeholder {
+  color: var(--text-tertiary);
+  transition: color var(--transition-base);
+}
+
+.scenario-input__textarea:focus::placeholder {
+  color: transparent;
+}
+
+.scenario-input__actions {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  right: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scenario-input__char-count {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.scenario-input__submit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 24px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #050816;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.scenario-input__submit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.scenario-input__submit:hover::after {
+  transform: translateX(100%);
+}
+
+.scenario-input__submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.scenario-input__submit:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.scenario-input__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.scenario-input__submit:disabled:hover {
+  box-shadow: none;
+}
+
+.scenario-input__submit:disabled::after {
+  display: none;
+}
+
+/* Example scenarios */
+.scenario-input__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-xl);
+  max-width: 720px;
+}
+
+.scenario-input__example {
+  padding: 8px 16px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.scenario-input__example:hover {
+  background: rgba(0, 212, 255, 0.08);
+  border-color: var(--border-accent);
+  color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .scenario-input { padding: var(--space-xl) 0; }
+  .scenario-input__examples { padding: 0 var(--space-md); }
+  .scenario-input__example { font-size: 0.75rem; }
+}
