@@ -1,7 +1,5 @@
 # 🔮 Foresight AI Decision Engine
 
-![Foresight Banner](https://via.placeholder.com/1200x400/050505/ffffff?text=Foresight+AI+Decision+Engine)
-
 > **Explore the Future Before It Happens**  
 > Foresight is an advanced "What If" simulation platform powered by Google Gemini and real-time public datasets. It allows policymakers, researchers, and citizens to simulate the multi-dimensional impact of policy changes or structural shifts.
 
