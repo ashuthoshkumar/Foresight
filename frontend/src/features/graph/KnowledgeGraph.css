@@ -1,0 +1,36 @@
+.knowledge-graph-container {
+  width: 100%;
+  height: calc(100vh - 120px);
+  position: relative;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.knowledge-graph-header {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(30, 30, 47, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.knowledge-graph-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.knowledge-graph-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}

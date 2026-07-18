@@ -39,6 +39,10 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  /** Get top scenarios from the community */
+  getLeaderboard: () =>
+    request<{ leaderboard: any[] }>('/api/v1/scenarios/leaderboard'),
+    
   /** Run a simulation for a "What If" scenario */
   simulate: (data: ScenarioRequest) =>
     request<SimulationResponse>('/api/v1/scenarios/simulate', {
@@ -74,4 +78,14 @@ export const api = {
     
   /** Auth Get Profile */
   getProfile: () => request<any>('/api/v1/auth/me'),
+
+  /** Get Knowledge Graph */
+  getKnowledgeGraph: () => request<any>('/api/v1/graph'),
+
+  /** Chat with AI about a scenario */
+  chat: (data: { scenario_query: string; message: string; history: any[] }) =>
+    request<any>('/api/v1/scenarios/chat', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };

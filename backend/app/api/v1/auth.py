@@ -20,7 +20,7 @@ def load_users():
         # Create dir if not exists
         os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
         return {}
-    with open(USERS_FILE, "r") as f:
+    with open(USERS_FILE, "r", encoding="utf-8") as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
@@ -28,7 +28,7 @@ def load_users():
 
 def save_users(users):
     os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
-    with open(USERS_FILE, "w") as f:
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, indent=2)
 
 def hash_password(password: str, salt: str) -> str:
@@ -56,15 +56,16 @@ async def register(req: AuthRequest):
     if len(req.password) < 6:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password must be at least 6 characters")
         
+    email = str(req.email).lower().strip()
     users = load_users()
-    if req.email in users:
+    if email in users:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     
     salt = secrets.token_hex(16)
     hashed = hash_password(req.password, salt)
     
-    users[req.email] = {
-        "email": req.email,
+    users[email] = {
+        "email": email,
         "name": req.name,
         "salt": salt,
         "password": hashed
@@ -72,18 +73,19 @@ async def register(req: AuthRequest):
     
     save_users(users)
     
-    token = create_access_token({"sub": req.email})
+    token = create_access_token({"sub": email})
     return {
         "success": True, 
         "message": "User registered successfully", 
         "token": token,
-        "user": {"email": req.email, "name": req.name}
+        "user": {"email": email, "name": req.name}
     }
 
 @router.post("/login")
 async def login(req: LoginRequest):
+    email = str(req.email).lower().strip()
     users = load_users()
-    user = users.get(req.email)
+    user = users.get(email)
     
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -93,7 +95,7 @@ async def login(req: LoginRequest):
     if hashed != user["password"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         
-    token = create_access_token({"sub": req.email})
+    token = create_access_token({"sub": email})
     
     return {
         "success": True, 

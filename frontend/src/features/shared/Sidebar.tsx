@@ -3,8 +3,8 @@ import { useAuth } from '../auth/AuthContext';
 import './Sidebar.css';
 
 interface SidebarProps {
-  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading';
-  onViewChange: (view: 'home' | 'history' | 'compare') => void;
+  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard';
+  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard') => void;
   historyCount: number;
   isOpen?: boolean;
 }
@@ -43,11 +43,36 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
         </button>
 
         <button
+          className={`sidebar__btn ${currentView === 'battle' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('battle')}
+          style={currentView !== 'battle' ? { background: 'linear-gradient(90deg, rgba(239,68,68,0.05), transparent)' } : { background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(124,58,237,0.2))', borderColor: 'rgba(239,68,68,0.4)' }}
+        >
+          <span className="sidebar__btn-icon">⚔️</span>
+          <span style={{ fontWeight: 700, color: '#f87171' }}>{t('nav.battle', 'Battle Mode')}</span>
+        </button>
+
+        <button
+          className={`sidebar__btn ${currentView === 'leaderboard' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('leaderboard')}
+        >
+          <span className="sidebar__btn-icon">🏆</span>
+          <span style={{ fontWeight: 500, color: '#fbbf24' }}>{t('nav.leaderboard', 'Leaderboard')}</span>
+        </button>
+
+        <button
           className={`sidebar__btn ${currentView === 'history' ? 'sidebar__btn--active' : ''}`}
           onClick={() => onViewChange('history')}
         >
           <span className="sidebar__btn-icon">📋</span>
           <span>{t('nav.history', 'History')} {historyCount > 0 && <span className="sidebar__badge">{historyCount}</span>}</span>
+        </button>
+
+        <button
+          className={`sidebar__btn ${currentView === 'knowledge_graph' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('knowledge_graph')}
+        >
+          <span className="sidebar__btn-icon">🕸️</span>
+          <span>{t('nav.graph', 'Knowledge Graph')}</span>
         </button>
       </nav>
       

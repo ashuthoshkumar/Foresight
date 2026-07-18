@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 import './ScenarioInput.css';
 
 interface ScenarioInputProps {
@@ -33,6 +34,23 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleVoiceResultA = useCallback((text: string) => {
+    setQuery(prev => {
+      const p = prev.trim();
+      return p ? p + ' ' + text : text;
+    });
+  }, []);
+
+  const handleVoiceResultB = useCallback((text: string) => {
+    setQueryB(prev => {
+      const p = prev.trim();
+      return p ? p + ' ' + text : text;
+    });
+  }, []);
+
+  const voiceA = useVoiceInput(handleVoiceResultA);
+  const voiceB = useVoiceInput(handleVoiceResultB);
 
   // Typewriter placeholder effect
   useEffect(() => {
@@ -132,10 +150,20 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isCompareMode ? "e.g., Offer 10% EV Subsidy" : displayedPlaceholder}
+              placeholder={isCompareMode ? t('compare.placeholderA', 'e.g., Offer 10% EV Subsidy') : displayedPlaceholder}
               maxLength={1000}
               disabled={isLoading}
             />
+            {voiceA.isSupported && (
+              <button
+                type="button"
+                className={`scenario-input__mic-btn ${voiceA.isListening ? 'scenario-input__mic-btn--active' : ''}`}
+                onClick={voiceA.toggleListening}
+                title="Dictate with voice"
+              >
+                🎙️
+              </button>
+            )}
           </div>
           
           {isCompareMode && (
@@ -148,10 +176,20 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
                 value={queryB}
                 onChange={e => setQueryB(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="e.g., Offer 30% EV Subsidy"
+                placeholder={t('compare.placeholderB', 'e.g., Offer 30% EV Subsidy')}
                 maxLength={1000}
                 disabled={isLoading}
               />
+              {voiceB.isSupported && (
+                <button
+                  type="button"
+                  className={`scenario-input__mic-btn ${voiceB.isListening ? 'scenario-input__mic-btn--active' : ''}`}
+                  onClick={voiceB.toggleListening}
+                  title="Dictate with voice"
+                >
+                  🎙️
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -160,16 +198,20 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
           <span className="scenario-input__char-count">
             {isCompareMode ? `${query.length} | ${queryB.length} / 1000` : `${query.length}/1000`}
           </span>
-          <button
-            type="submit"
+          <button 
+            type="submit" 
             className="scenario-input__submit"
             disabled={!canSubmit || isLoading}
             id="simulate-button"
+            style={isCompareMode ? { background: 'linear-gradient(135deg, rgba(6,182,212,0.8), rgba(124,58,237,0.8))' } : {}}
           >
             {isLoading ? (
               <>⏳ {t('home.simulating')}</>
             ) : isCompareMode ? (
-              <>⚖️ Compare Scenarios</>
+              <>
+                <span className="scenario-input__submit-icon">⚖️</span>
+                {t('compare.compareScenarios', 'Compare Scenarios')}
+              </>
             ) : (
               <>🔮 {t('home.simulateFuture')}</>
             )}

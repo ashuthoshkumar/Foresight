@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import AnimatedBackground from './features/shared/AnimatedBackground';
 import Navbar from './features/shared/Navbar';
@@ -13,8 +13,11 @@ import type { SimulationResult } from './features/scenario/types';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import AuthModal from './features/auth/AuthModal';
 import LandingPage from './features/landing/LandingPage';
+import KnowledgeGraph from './features/graph/KnowledgeGraph';
+import BattleMode from './features/battle/BattleMode';
+import Leaderboard from './features/community/Leaderboard';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard';
 
 function AppContent() {
   const [view, setView] = useState<View>('home');
@@ -24,6 +27,20 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { i18n } = useTranslation();
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await api.getHistory();
+        if (response.success && response.scenarios) {
+          setHistory(response.scenarios);
+        }
+      } catch (err) {
+        console.error('Failed to load history', err);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   const handleSimulate = useCallback(async (query: string) => {
     setView('loading');
@@ -87,15 +104,15 @@ function AppContent() {
     setIsSidebarOpen(false);
   }, []);
 
-  const handleViewChange = useCallback((v: 'home' | 'history' | 'compare') => {
+  const handleViewChange = useCallback((v: View) => {
     setView(v);
-    if (v === 'home' || v === 'compare') {
+    if (v === 'home' || v === 'compare' || v === 'battle') {
       setCurrentResult(null);
       setComparisonResults(null);
       setError(null);
     }
-    // Only close if it's not home or compare (like if they click history, keep it open so they can see history)
-    if (v !== 'home' && v !== 'history' && v !== 'compare') {
+    // Only close if it's not home, compare, battle, knowledge_graph, or leaderboard
+    if (v !== 'home' && v !== 'history' && v !== 'compare' && v !== 'knowledge_graph' && v !== 'battle' && v !== 'leaderboard') {
         setIsSidebarOpen(false);
     } else {
         setIsSidebarOpen(true);
@@ -167,6 +184,18 @@ function AppContent() {
           {view === 'history' && (
             <History scenarios={history} onSelect={handleSelectHistory} />
           )}
+
+          {view === 'knowledge_graph' && (
+            <KnowledgeGraph />
+          )}
+
+          {view === 'battle' && (
+            <BattleMode onBack={handleBack} />
+          )}
+
+          {view === 'leaderboard' && (
+            <Leaderboard onRun={handleSimulate} />
+          )}
         </main>
 
         <footer style={{
@@ -210,8 +239,7 @@ function MainApp() {
       <AuthModal 
         isOpen={authModalState.isOpen} 
         onClose={() => setAuthModalState(prev => ({ ...prev, isOpen: false }))} 
-        // We can pass initial mode if we want, but AuthModal currently manages its own mode.
-        // For simplicity, we just open it. It defaults to 'login'.
+        initialMode={authModalState.mode}
       />
     </>
   );

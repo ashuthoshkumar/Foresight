@@ -7,13 +7,14 @@ import './AuthModal.css';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMode?: 'login' | 'register';
 }
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
   const { t } = useTranslation();
   const { login } = useAuth();
   
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -24,11 +25,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
+      setMode(initialMode);
       setError(null);
       setSuccessMsg(null);
       setPassword('');
     }
-  }, [isOpen]);
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 

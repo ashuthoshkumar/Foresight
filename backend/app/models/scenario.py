@@ -122,3 +122,17 @@ class ErrorResponse(BaseModel):
     success: bool = False
     message: str
     detail: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    scenario_query: str
+    message: str
+    history: list[ChatMessage] = Field(default_factory=list)
+
+class ChatResponse(BaseModel):
+    success: bool = True
+    reply: str
+    error: Optional[str] = None

@@ -1,0 +1,90 @@
+/* ── Impact Map ──────────────────────────────────────────────── */
+
+.impact-map {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  background: #e8e8e8;
+}
+
+.impact-map__leaflet {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-xl);
+  z-index: 0;
+}
+
+/* Override Leaflet defaults for light theme */
+.impact-map .leaflet-container {
+  background: #e8e8e8;
+  font-family: var(--font-display);
+}
+
+/* Popup styling */
+.impact-map__popup .leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  color: var(--text-primary);
+}
+
+.impact-map__popup .leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.impact-map__popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.impact-map__popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.impact-map__popup-content strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.impact-map__popup-area {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.impact-map__popup-score {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.impact-map__popup-score b {
+  color: #06b6d4;
+}
+
+/* Pulsing circles animation via SVG paths */
+.impact-map .leaflet-interactive {
+  animation: zone-pulse 3s ease-in-out infinite;
+}
+
+.impact-map .leaflet-interactive:nth-child(2n) {
+  animation-delay: -1s;
+}
+
+.impact-map .leaflet-interactive:nth-child(3n) {
+  animation-delay: -2s;
+}
+
+@keyframes zone-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SimulationResult } from '../scenario/types';
 import RadarChart from './RadarChart';
 import ImpactCard from './ImpactCard';
+import { exportToPDF } from '../../utils/exportPDF';
 import './Dashboard.css';
 
 interface CompareDashboardProps {
@@ -12,6 +14,8 @@ interface CompareDashboardProps {
 
 export default function CompareDashboard({ resultA, resultB, onBack }: CompareDashboardProps) {
   const { t } = useTranslation();
+  const [exportingA, setExportingA] = useState(false);
+  const [exportingB, setExportingB] = useState(false);
   
   const circumference = 2 * Math.PI * 42;
   const getScoreOffset = (score: number) => circumference - (score / 100) * circumference;
@@ -28,9 +32,26 @@ export default function CompareDashboard({ resultA, resultB, onBack }: CompareDa
       {/* Header */}
       <div className="dashboard__header" style={{ alignItems: 'flex-start' }}>
         <div className="dashboard__query-section" style={{ flex: 1 }}>
-          <button className="dashboard__back-btn" onClick={onBack}>
-            {t('dashboard.newScenario')}
-          </button>
+          <div className="dashboard__header-actions">
+            <button className="dashboard__back-btn" onClick={onBack}>
+              {t('dashboard.newScenario')}
+            </button>
+            <button
+              className={`dashboard__export-btn ${exportingA ? 'dashboard__export-btn--loading' : ''}`}
+              onClick={async () => { setExportingA(true); try { await exportToPDF(resultA); } finally { setExportingA(false); } }}
+              disabled={exportingA || exportingB}
+            >
+              {exportingA ? '⏳...' : '📤 Export A'}
+            </button>
+            <button
+              className={`dashboard__export-btn ${exportingB ? 'dashboard__export-btn--loading' : ''}`}
+              style={{ background: 'linear-gradient(135deg, #d97706, #10b981)' }}
+              onClick={async () => { setExportingB(true); try { await exportToPDF(resultB); } finally { setExportingB(false); } }}
+              disabled={exportingA || exportingB}
+            >
+              {exportingB ? '⏳...' : '📤 Export B'}
+            </button>
+          </div>
           
           <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
             <div style={{ flex: 1 }}>

@@ -9,7 +9,11 @@ const resources = {
         aiDecisionEngine: 'AI Decision Engine',
         aiReady: 'AI Ready',
         simulate: 'Simulate',
-        history: 'History'
+        compare: 'Compare',
+        battle: 'Battle Mode',
+        graph: 'Knowledge Graph',
+        history: 'History',
+        leaderboard: 'Leaderboard'
       },
       home: {
         poweredBy: 'Powered by AI + Real Data',
@@ -86,6 +90,37 @@ const resources = {
         signingIn: 'Signing in...',
         registerSuccess: 'Successfully registered',
         logoutSuccess: 'Successfully signed out'
+      },
+      leaderboard: {
+        title: 'Community Leaderboard',
+        subtitle: 'Discover and simulate the most impactful scenarios explored by the community.',
+        rank: 'Rank',
+        scenario: 'Scenario',
+        domain: 'Domain',
+        impactScore: 'Impact Score',
+        runs: 'Runs',
+        action: 'Action',
+        run: 'Run'
+      },
+      battle: {
+        experimental: 'EXPERIMENTAL MODE',
+        title: 'SCENARIO BATTLE',
+        subtitle: 'Pit two competing scenarios against each other to see which one comes out on top across all impact axes.',
+        fighterA: 'FIGHTER A',
+        fighterB: 'FIGHTER B',
+        placeholderA: 'e.g., What if we ban all private cars in the city center?',
+        placeholderB: 'e.g., What if we make public transport entirely free?',
+        backToDashboard: 'Back to Dashboard',
+        fight: 'FIGHT! ⚔️'
+      },
+      compare: {
+        compareScenarios: 'Compare Scenarios',
+        placeholderA: 'e.g., Offer 10% EV Subsidy',
+        placeholderB: 'e.g., Offer 30% EV Subsidy'
+      },
+      graph: {
+        title: 'Foresight Knowledge Graph',
+        subtitle: 'Interactive visualization of the data grounding AI decisions.'
       }
     }
   },
@@ -97,7 +132,10 @@ const resources = {
         aiReady: 'एआई तैयार है',
         simulate: 'अनुकरण करें',
         compare: 'तुलना करें',
-        history: 'इतिहास'
+        battle: 'बैटल मोड',
+        graph: 'नॉलेज ग्राफ',
+        history: 'इतिहास',
+        leaderboard: 'लीडरबोर्ड'
       },
       auth: {
         signIn: 'साइन इन करें',
@@ -174,6 +212,37 @@ const resources = {
         aiEstimate: 'एआई अनुमान',
         kgDesc: 'सत्यापन योग्य सार्वजनिक डेटासेट और सरकारी रिकॉर्ड से गणना की गई',
         aiDesc: 'आर्थिक मॉडल के आधार पर Google Gemini द्वारा उत्पन्न अनुमान'
+      },
+      leaderboard: {
+        title: 'समुदाय लीडरबोर्ड',
+        subtitle: 'समुदाय द्वारा खोजे गए सबसे प्रभावशाली परिदृश्यों की खोज करें और अनुकरण करें।',
+        rank: 'रैंक',
+        scenario: 'परिदृश्य',
+        domain: 'डोमेन',
+        impactScore: 'प्रभाव स्कोर',
+        runs: 'रन',
+        action: 'कार्रवाई',
+        run: 'चलाएं'
+      },
+      battle: {
+        experimental: 'प्रायोगिक मोड',
+        title: 'परिदृश्य बैटल',
+        subtitle: 'दो प्रतिस्पर्धी परिदृश्यों को एक-दूसरे के खिलाफ रखें और देखें कि कौन शीर्ष पर आता है।',
+        fighterA: 'फाइटर A',
+        fighterB: 'फाइटर B',
+        placeholderA: 'उदा., क्या होगा यदि हम शहर के केंद्र में सभी निजी कारों पर प्रतिबंध लगा दें?',
+        placeholderB: 'उदा., क्या होगा यदि हम सार्वजनिक परिवहन को पूरी तरह से मुफ्त कर दें?',
+        backToDashboard: 'डैशबोर्ड पर वापस',
+        fight: 'लड़ो! ⚔️'
+      },
+      compare: {
+        compareScenarios: 'परिदृश्यों की तुलना करें',
+        placeholderA: 'उदा., 10% ईवी सब्सिडी की पेशकश करें',
+        placeholderB: 'उदा., 30% ईवी सब्सिडी की पेशकश करें'
+      },
+      graph: {
+        title: 'फोरसाइट नॉलेज ग्राफ',
+        subtitle: 'AI निर्णयों को आधार बनाने वाले डेटा का इंटरैक्टिव विज़ुअलाइज़ेशन।'
       }
     }
   },
@@ -184,7 +253,11 @@ const resources = {
         aiDecisionEngine: 'AI నిర్ణయ యంత్రం',
         aiReady: 'AI సిద్ధంగా ఉంది',
         simulate: 'సిమ్యులేట్ చేయండి',
-        history: 'చరిత్ర'
+        compare: 'పోల్చండి',
+        battle: 'బాటిల్ మోడ్',
+        graph: 'నాలెడ్జ్ గ్రాఫ్',
+        history: 'చరిత్ర',
+        leaderboard: 'లీడర్‌బోర్డ్'
       },
       home: {
         poweredBy: 'AI + రియల్ డేటాతో పవర్ చేయబడింది',
@@ -245,6 +318,37 @@ const resources = {
         aiEstimate: 'AI అంచనా',
         kgDesc: 'ధృవీకరించదగిన పబ్లిక్ డేటాసెట్‌లు మరియు ప్రభుత్వ రికార్డుల నుండి లెక్కించబడింది',
         aiDesc: 'ఆర్థిక నమూనాల ఆధారంగా Google Gemini ద్వారా రూపొందించబడిన అంచనా'
+      },
+      leaderboard: {
+        title: 'కమ్యూనిటీ లీడర్‌బోర్డ్',
+        subtitle: 'కమ్యూనిటీ అన్వేషించిన అత్యంత ప్రభావవంతమైన పరిస్థితులను కనుగొనండి మరియు సిమ్యులేట్ చేయండి.',
+        rank: 'ర్యాంక్',
+        scenario: 'పరిస్థితి',
+        domain: 'డొమైన్',
+        impactScore: 'ప్రభావ స్కోర్',
+        runs: 'రన్‌లు',
+        action: 'చర్య',
+        run: 'రన్'
+      },
+      battle: {
+        experimental: 'ప్రయోగాత్మక మోడ్',
+        title: 'సన్నివేశం బ్యాటిల్',
+        subtitle: 'ఏది అగ్రస్థానంలో నిలుస్తుందో చూడటానికి రెండు పోటీ పరిస్థితులను ఒకదానితో ఒకటి ఎదుర్కోండి.',
+        fighterA: 'ఫైటర్ A',
+        fighterB: 'ఫైటర్ B',
+        placeholderA: 'ఉదా., నగర కేంద్రంలో ప్రైవేట్ కార్లన్నింటినీ నిషేధిస్తే ఏమి జరుగుతుంది?',
+        placeholderB: 'ఉదా., ప్రజా రవాణాను పూర్తిగా ఉచితం చేస్తే ఏమి జరుగుతుంది?',
+        backToDashboard: 'డ్యాష్‌బోర్డ్‌కు తిరిగి వెళ్ళు',
+        fight: 'పోరాడు! ⚔️'
+      },
+      compare: {
+        compareScenarios: 'పరిస్థితులను సరిపోల్చండి',
+        placeholderA: 'ఉదా., 10% EV రాయితీని ఆఫర్ చేయండి',
+        placeholderB: 'ఉదా., 30% EV రాయితీని ఆఫర్ చేయండి'
+      },
+      graph: {
+        title: 'ఫోర్‌సైట్ నాలెడ్జ్ గ్రాఫ్',
+        subtitle: 'AI నిర్ణయాలకు ఆధారమైన డేటా యొక్క ఇంటరాక్టివ్ విజువలైజేషన్.'
       }
     }
   }

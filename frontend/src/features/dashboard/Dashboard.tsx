@@ -1,8 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SimulationResult } from '../scenario/types';
 import RadarChart from './RadarChart';
 import ImpactCard from './ImpactCard';
+import ImpactMap from './ImpactMap';
+import TimelineProjection from './TimelineProjection';
+import FollowUpChat from './FollowUpChat';
+import ReportCard from './ReportCard';
+import { generateProjections } from '../../utils/projection';
+import { exportToPDF } from '../../utils/exportPDF';
+import { exportImage } from '../../utils/exportImage';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -12,15 +19,32 @@ interface DashboardProps {
 
 export default function Dashboard({ result, onBack }: DashboardProps) {
   const { t } = useTranslation();
+  const [isExporting, setIsExporting] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [currentYear, setCurrentYear] = useState(2024);
+  const [mapLayer, setMapLayer] = useState<'environmental' | 'financial' | 'human' | 'risks'>('environmental');
+
+  const projections = useMemo(() => generateProjections(result, 2024, 2035), [result]);
+  
+  const currentResult = useMemo(() => {
+    const proj = projections.find(p => p.year === currentYear);
+    if (!proj) return result;
+    return {
+      ...result,
+      overall_score: proj.overall_score,
+      impacts: proj.impacts
+    };
+  }, [projections, currentYear, result]);
+
   const circumference = 2 * Math.PI * 42;
-  const scoreOffset = circumference - (result.overall_score / 100) * circumference;
+  const scoreOffset = circumference - (currentResult.overall_score / 100) * circumference;
 
   const scoreColor = useMemo(() => {
-    if (result.overall_score >= 75) return '#10b981';
-    if (result.overall_score >= 50) return '#06b6d4';
-    if (result.overall_score >= 25) return '#f59e0b';
+    if (currentResult.overall_score >= 75) return '#10b981';
+    if (currentResult.overall_score >= 50) return '#06b6d4';
+    if (currentResult.overall_score >= 25) return '#f59e0b';
     return '#ef4444';
-  }, [result.overall_score]);
+  }, [currentResult.overall_score]);
 
   const domainLabel = result.domain === 'hyderabad_ev_traffic'
     ? '🏙️ Hyderabad EV/Traffic'
@@ -31,22 +55,52 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
       {/* Header */}
       <div className="dashboard__header">
         <div className="dashboard__query-section">
-          <button className="dashboard__back-btn" onClick={onBack}>
-            {t('dashboard.newScenario')}
-          </button>
+          <div className="dashboard__header-actions">
+            <button className="dashboard__back-btn" onClick={onBack}>
+              {t('dashboard.newScenario')}
+            </button>
+            <button
+              className={`dashboard__export-btn ${isExporting ? 'dashboard__export-btn--loading' : ''}`}
+              onClick={async () => {
+                setIsExporting(true);
+                try {
+                  await exportToPDF(result);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting || isGeneratingImage}
+            >
+              {isExporting ? '⏳ Generating...' : '📤 Export PDF'}
+            </button>
+            <button
+              className={`dashboard__export-btn dashboard__export-btn--image ${isGeneratingImage ? 'dashboard__export-btn--loading' : ''}`}
+              onClick={async () => {
+                setIsGeneratingImage(true);
+                try {
+                  await exportImage('foresight-report-card', `foresight-scenario-${Date.now()}.png`);
+                } finally {
+                  setIsGeneratingImage(false);
+                }
+              }}
+              disabled={isExporting || isGeneratingImage}
+            >
+              {isGeneratingImage ? '📸 Capturing...' : '📸 Share Card'}
+            </button>
+          </div>
           <div className="dashboard__query-label">{t('dashboard.scenarioAnalyzed')}</div>
-          <h2 className="dashboard__query-text">{result.query}</h2>
+          <h2 className="dashboard__query-text">{currentResult.query}</h2>
           <div className="dashboard__meta">
             <span className="dashboard__meta-domain">{domainLabel}</span>
-            {result.processing_time_ms && (
+            {currentResult.processing_time_ms && (
               <span className="dashboard__meta-item">
-                ⚡ {(result.processing_time_ms / 1000).toFixed(1)}s
+                ⚡ {(currentResult.processing_time_ms / 1000).toFixed(1)}s
               </span>
             )}
             <span className="dashboard__meta-item">
-              📅 {new Date(result.timestamp).toLocaleDateString('en-IN', {
+              📅 {currentYear === 2024 ? new Date(currentResult.timestamp).toLocaleDateString('en-IN', {
                 day: 'numeric', month: 'short', year: 'numeric',
-              })}
+              }) : `Proj. ${currentYear}`}
             </span>
           </div>
         </div>
@@ -67,35 +121,71 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               />
             </svg>
             <span className="dashboard__overall-value" style={{ color: scoreColor }}>
-              {Math.round(result.overall_score)}
+              {Math.round(currentResult.overall_score)}
             </span>
           </div>
-          <div className="dashboard__overall-label">{t('dashboard.overallImpact')}</div>
+          <div className="dashboard__overall-label">{currentYear === 2024 ? t('dashboard.overallImpact') : `Projected ${currentYear}`}</div>
         </div>
       </div>
 
       {/* Summary */}
       <div className="dashboard__summary glass">
-        <div className="dashboard__summary-text">{result.overall_summary}</div>
+        <div className="dashboard__summary-text">{currentResult.overall_summary}</div>
       </div>
 
       {/* Radar Chart */}
       <div className="dashboard__radar-section">
         <div className="dashboard__radar-card glass">
-          <div className="dashboard__radar-title">{t('dashboard.multiDimensional')}</div>
-          <RadarChart impacts={result.impacts} size={320} />
+          <div className="dashboard__radar-title">{t('dashboard.multiDimensional')} {currentYear !== 2024 && `(${currentYear})`}</div>
+          <RadarChart impacts={currentResult.impacts} size={320} />
         </div>
+      </div>
+
+      {/* Live City Impact Map */}
+      <div className="dashboard__map-section">
+        <div className="dashboard__map-header">
+          <div className="dashboard__impacts-title" style={{ marginBottom: 0 }}>🗺️ Live City Impact Map</div>
+          <div className="dashboard__map-layers">
+            {(['environmental', 'financial', 'human', 'risks'] as const).map(layer => (
+              <button
+                key={layer}
+                className={`dashboard__map-layer-btn ${mapLayer === layer ? 'dashboard__map-layer-btn--active' : ''}`}
+                onClick={() => setMapLayer(layer)}
+              >
+                {layer === 'environmental' && '🌿'}
+                {layer === 'financial' && '💰'}
+                {layer === 'human' && '👥'}
+                {layer === 'risks' && '⚠️'}
+                {' '}{layer.charAt(0).toUpperCase() + layer.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ImpactMap result={currentResult} activeLayer={mapLayer} />
       </div>
 
       {/* Impact Cards */}
       <div className="dashboard__impacts-title">
-        {t('dashboard.detailedBreakdown')}
+        {t('dashboard.detailedBreakdown')} {currentYear !== 2024 && `for ${currentYear}`}
       </div>
       <div className="dashboard__impacts-grid stagger-children">
-        {result.impacts.map((impact, i) => (
+        {currentResult.impacts.map((impact, i) => (
           <ImpactCard key={impact.category} impact={impact} index={i} />
         ))}
       </div>
+
+      {/* Timeline Projection Component */}
+      <TimelineProjection 
+        projections={projections} 
+        currentYear={currentYear} 
+        onYearChange={setCurrentYear} 
+      />
+
+      {/* AI Follow-up Chat */}
+      <FollowUpChat scenarioQuery={result.query} />
+
+      {/* Hidden Report Card for Image Export */}
+      <ReportCard result={currentResult} />
     </div>
   );
 }

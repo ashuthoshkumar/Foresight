@@ -41,28 +41,15 @@ class SimulationEngine:
         parameters: Optional[dict[str, Any]] = None,
         language: str = "en",
     ) -> SimulationResult:
-        """
-        Run a full simulation for the given scenario.
-
-        Args:
-            query: Natural language scenario description
-            parameters: Optional parameter overrides
-            language: Language code for the output
-
-
-        Returns:
-            Complete SimulationResult with all 5 impact axes
-        """
         start_time = time.time()
         parameters = parameters or {}
 
         logger.info("Starting simulation for: %s", query[:100])
 
-        # Step 1: Interpret scenario
-        interpreted = await llm_service.interpret_scenario(query)
-        logger.info("Interpreted: %s", interpreted)
+        # ── Step 1: Fast fallback interpretation (no LLM needed) ──
+        interpreted = llm_service._fallback_interpret(query)
 
-        # Step 2: Query Knowledge Graph
+        # ── Step 2: Query Knowledge Graph immediately ──
         kg_calculations = None
         domain = interpreted.get("domain", "general")
 
@@ -70,25 +57,23 @@ class SimulationEngine:
             vehicle_type = interpreted.get("vehicle_type", "two_wheelers") or "two_wheelers"
             timeline = interpreted.get("timeline")
             ban_year = int(timeline) if timeline and timeline.isdigit() else 2030
-
             kg_calculations = knowledge_graph.calculate_ev_ban_impact(
                 vehicle_type=vehicle_type,
                 ban_year=ban_year,
             )
             logger.info("KG calculations complete for %s", vehicle_type)
 
-        # Step 3: Get domain summary for LLM context
-        domain_summary = knowledge_graph.get_domain_summary(domain)
-
-        # Step 4: Generate full impact analysis via LLM
-        llm_analysis = await llm_service.generate_impact_analysis(
+        # ── Step 3: Single combined LLM call ──
+        llm_analysis = await llm_service.analyze_scenario_combined(
             query=query,
             kg_data=kg_calculations,
-            interpreted_params=interpreted,
             language=language,
         )
 
-        # Step 5: Build structured result
+        # Update domain from LLM if it detected something different
+        domain = llm_analysis.get("domain", domain)
+
+        # ── Step 4: Build structured result ──
         impacts = self._build_impacts(llm_analysis.get("impacts", []), language)
         overall_summary = llm_analysis.get("overall_summary", "Analysis complete.")
         overall_score = llm_analysis.get("overall_score", 50.0)
@@ -110,14 +95,13 @@ class SimulationEngine:
             processing_time_ms=round(processing_time, 1),
         )
 
-        # Save to history
         self._history.append(result)
         logger.info(
             "Simulation complete in %.0fms — score=%.1f, domain=%s",
             processing_time, overall_score, domain,
         )
-
         return result
+
 
     def _build_impacts(self, raw_impacts: list[dict[str, Any]], language: str = "en") -> list[ImpactAxis]:
         """Convert raw LLM/fallback analysis into typed ImpactAxis models."""
