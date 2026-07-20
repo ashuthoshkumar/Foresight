@@ -11,6 +11,10 @@ import { generateProjections } from '../../utils/projection';
 import { exportToPDF } from '../../utils/exportPDF';
 import { exportImage } from '../../utils/exportImage';
 import { playSuccessChime, playWarningTone } from '../../utils/audio';
+import { api } from '../../api/client';
+import { FutureNewspaper } from '../newspaper/FutureNewspaper';
+import AIMayor from './AIMayor';
+import ShareButton from './ShareButton';
 import SmartAlert from './SmartAlert';
 import './Dashboard.css';
 
@@ -23,6 +27,8 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
   const { t } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isGeneratingNewspaper, setIsGeneratingNewspaper] = useState(false);
+  const [newspaperData, setNewspaperData] = useState<any | null>(null);
   const [currentYear, setCurrentYear] = useState(2024);
   const [mapLayer, setMapLayer] = useState<'environmental' | 'financial' | 'human' | 'risks'>('environmental');
   const [alertConfig, setAlertConfig] = useState<{ type: 'success' | 'warning', message: string } | null>(null);
@@ -59,6 +65,23 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
     if (currentResult.overall_score >= 25) return '#f59e0b';
     return '#ef4444';
   }, [currentResult.overall_score]);
+
+  const handleGenerateNewspaper = async () => {
+    setIsGeneratingNewspaper(true);
+    try {
+      const response = await api.generateNewspaper({
+        scenario_query: result.query,
+        overall_score: result.overall_score
+      });
+      if (response.success) {
+        setNewspaperData(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to generate newspaper', err);
+    } finally {
+      setIsGeneratingNewspaper(false);
+    }
+  };
 
   const domainLabel = result.domain === 'hyderabad_ev_traffic'
     ? '🏙️ Hyderabad EV/Traffic'
@@ -97,10 +120,18 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
                   setIsGeneratingImage(false);
                 }
               }}
-              disabled={isExporting || isGeneratingImage}
+              disabled={isGeneratingImage || isExporting}
             >
               {isGeneratingImage ? '📸 Capturing...' : '📸 Share Card'}
             </button>
+            <button 
+              className={`dashboard__export-btn dashboard__export-btn--news ${isGeneratingNewspaper ? 'dashboard__export-btn--loading' : ''}`}
+              onClick={handleGenerateNewspaper}
+              disabled={isGeneratingNewspaper || isExporting || isGeneratingImage}
+            >
+              {isGeneratingNewspaper ? '📰 Writing...' : '📰 Read 2030 News'}
+            </button>
+            <ShareButton result={result} />
           </div>
           <div className="dashboard__query-label">{t('dashboard.scenarioAnalyzed')}</div>
           <h2 className="dashboard__query-text">{currentResult.query}</h2>
@@ -155,7 +186,7 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
         </div>
       </div>
 
-      {/* Live City Impact Map */}
+      {/* Interactive 3D Digital Twin City */}
       <div className="dashboard__map-section">
         <div className="dashboard__map-header">
           <div className="dashboard__impacts-title" style={{ marginBottom: 0 }}>🗺️ Live City Impact Map</div>
@@ -195,8 +226,17 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
         onYearChange={setCurrentYear} 
       />
 
+      {/* AI Mayor Voice Briefing */}
+      <AIMayor
+        scenarioQuery={result.query}
+        overallScore={result.overall_score}
+        overallSummary={result.overall_summary}
+      />
+
       {/* AI Follow-up Chat */}
-      <FollowUpChat scenarioQuery={result.query} />
+      <div className="dashboard__chat-section">
+        <FollowUpChat scenarioQuery={result.query} />
+      </div>
 
       {/* Hidden Report Card for Image Export */}
       <ReportCard result={currentResult} />
@@ -206,7 +246,16 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
         <SmartAlert 
           type={alertConfig.type} 
           message={alertConfig.message} 
+          duration={5000} 
           onClose={() => setAlertConfig(null)} 
+        />
+      )}
+
+      {/* Future Newspaper Modal */}
+      {newspaperData && (
+        <FutureNewspaper 
+          data={newspaperData} 
+          onClose={() => setNewspaperData(null)} 
         />
       )}
     </div>

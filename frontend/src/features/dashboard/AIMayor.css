@@ -1,0 +1,235 @@
+.ai-mayor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glowing background pulse */
+.ai-mayor::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  animation: mayorGlow 4s ease-in-out infinite;
+}
+
+@keyframes mayorGlow {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+}
+
+/* ── Avatar ─────────────────────────────────────────────── */
+.ai-mayor__avatar-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-mayor__avatar-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--ring-color, var(--accent-primary));
+  opacity: 0.4;
+  animation: ringPulse 2.5s ease-in-out infinite;
+}
+
+.ai-mayor__avatar-wrap--speaking .ai-mayor__avatar-ring {
+  opacity: 0.9;
+  animation: ringPulseFast 0.8s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.08); opacity: 0.6; }
+}
+
+@keyframes ringPulseFast {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+.ai-mayor__avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a1a3e, #0a0e27);
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.ai-mayor__avatar-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Eyes */
+.ai-mayor__eyes {
+  display: flex;
+  gap: 18px;
+}
+
+.ai-mayor__eye {
+  width: 10px;
+  height: 10px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+.ai-mayor__eye--blink {
+  animation: eyeBlink 3s ease-in-out infinite;
+}
+
+@keyframes eyeBlink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* Mouth */
+.ai-mayor__mouth {
+  width: 22px;
+  height: 5px;
+  background: var(--accent-primary);
+  border-radius: 3px;
+  box-shadow: 0 0 6px var(--accent-primary);
+  transition: all 0.15s;
+}
+
+.ai-mayor__mouth--talking {
+  animation: mouthTalk 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes mouthTalk {
+  from { height: 5px; width: 22px; border-radius: 3px; }
+  to { height: 10px; width: 18px; border-radius: 50%; }
+}
+
+/* Orbiting particles */
+.ai-mayor__particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--p-color, var(--accent-primary));
+  box-shadow: 0 0 8px var(--p-color, var(--accent-primary));
+  top: 50%; left: 50%;
+  transform-origin: 0 0;
+}
+
+.ai-mayor__particle--1 { animation: orbit1 1.8s linear infinite; }
+.ai-mayor__particle--2 { animation: orbit2 2.4s linear infinite; }
+.ai-mayor__particle--3 { animation: orbit3 3s linear infinite; }
+
+@keyframes orbit1 {
+  from { transform: rotate(0deg) translateX(60px); }
+  to { transform: rotate(360deg) translateX(60px); }
+}
+@keyframes orbit2 {
+  from { transform: rotate(120deg) translateX(55px); }
+  to { transform: rotate(480deg) translateX(55px); }
+}
+@keyframes orbit3 {
+  from { transform: rotate(240deg) translateX(65px); }
+  to { transform: rotate(600deg) translateX(65px); }
+}
+
+/* ── Info ───────────────────────────────────────────────── */
+.ai-mayor__info {
+  text-align: center;
+}
+
+.ai-mayor__title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.ai-mayor__status {
+  font-size: 0.85rem;
+  transition: color 0.3s;
+}
+
+/* ── Waveform ───────────────────────────────────────────── */
+.ai-mayor__waveform {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 50px;
+}
+
+.ai-mayor__bar {
+  width: 5px;
+  min-height: 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Controls ───────────────────────────────────────────── */
+.ai-mayor__controls {
+  display: flex;
+  gap: 12px;
+}
+
+.ai-mayor__btn {
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-base);
+  font-family: var(--font-body);
+  letter-spacing: 0.5px;
+}
+
+.ai-mayor__btn--speak {
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.ai-mayor__btn--speak:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0, 212, 255, 0.5);
+}
+
+.ai-mayor__btn--stop {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  animation: stopPulse 1s ease-in-out infinite;
+}
+
+.ai-mayor__btn--stop:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(239, 68, 68, 0.6);
+}
+
+@keyframes stopPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 4px 30px rgba(239, 68, 68, 0.7); }
+}

@@ -1,7 +1,8 @@
 /* ── Dashboard ──────────────────────────────────────────────── */
 
 .dashboard {
-  padding: var(--space-xl) 0 var(--space-3xl);
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-3xl);
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -96,6 +97,15 @@
 
 .dashboard__export-btn--loading {
   animation: exportPulse 1.2s ease-in-out infinite;
+}
+
+.dashboard__export-btn--news {
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
+  box-shadow: 0 2px 12px rgba(236, 72, 153, 0.35);
+}
+
+.dashboard__export-btn--news:hover {
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.5);
 }
 
 @keyframes exportPulse {

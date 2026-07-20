@@ -10,6 +10,7 @@ from app.models.scenario import (
     SimulationResponse,
     ChatRequest,
     ChatResponse,
+    NewspaperRequest,
 )
 from app.services.simulation import simulation_engine
 from app.services.llm_service import generate_chat_reply, llm_service
@@ -156,4 +157,22 @@ async def chat_scenario(request: ChatRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Chat failed: {str(e)}",
+        )
+
+@router.post(
+    "/newspaper",
+    responses={500: {"model": ErrorResponse}},
+)
+async def generate_newspaper(request: NewspaperRequest):
+    """Generate a futuristic newspaper article based on the scenario."""
+    try:
+        newspaper_data = await llm_service.generate_newspaper(
+            scenario_query=request.scenario_query,
+            overall_score=request.overall_score
+        )
+        return {"success": True, "data": newspaper_data}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate newspaper: {str(e)}",
         )

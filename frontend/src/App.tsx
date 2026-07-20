@@ -16,8 +16,9 @@ import LandingPage from './features/landing/LandingPage';
 import KnowledgeGraph from './features/graph/KnowledgeGraph';
 import BattleMode from './features/battle/BattleMode';
 import Leaderboard from './features/community/Leaderboard';
+import DelayRiskPage from './features/delayrisk/DelayRiskPage';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk';
 
 function AppContent() {
   const [view, setView] = useState<View>('home');
@@ -40,6 +41,25 @@ function AppContent() {
       }
     };
     fetchHistory();
+  }, []);
+
+  // Parse shared result from URL query param (?s=<shortId>)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shareId = params.get('s');
+    if (shareId) {
+      api.getShare(shareId)
+        .then(response => {
+          if (response.success && response.result) {
+            setCurrentResult(response.result);
+            setView('dashboard');
+            setIsSidebarOpen(false);
+            // Clean the URL without reloading
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        })
+        .catch(err => console.warn('Could not load shared result:', err));
+    }
   }, []);
 
   const handleSimulate = useCallback(async (query: string) => {
@@ -112,7 +132,7 @@ function AppContent() {
       setError(null);
     }
     // Only close if it's not home, compare, battle, knowledge_graph, or leaderboard
-    if (v !== 'home' && v !== 'history' && v !== 'compare' && v !== 'knowledge_graph' && v !== 'battle' && v !== 'leaderboard') {
+    if (v !== 'home' && v !== 'history' && v !== 'compare' && v !== 'knowledge_graph' && v !== 'battle' && v !== 'leaderboard' && v !== 'delay_risk') {
         setIsSidebarOpen(false);
     } else {
         setIsSidebarOpen(true);
@@ -195,6 +215,10 @@ function AppContent() {
 
           {view === 'leaderboard' && (
             <Leaderboard onRun={handleSimulate} />
+          )}
+
+          {view === 'delay_risk' && (
+            <DelayRiskPage />
           )}
         </main>
 

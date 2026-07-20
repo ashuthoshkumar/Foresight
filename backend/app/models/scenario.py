@@ -136,3 +136,7 @@ class ChatResponse(BaseModel):
     success: bool = True
     reply: str
     error: Optional[str] = None
+
+class NewspaperRequest(BaseModel):
+    scenario_query: str
+    overall_score: float

@@ -58,6 +58,13 @@ export const api = {
   getHistory: (limit = 50) =>
     request<HistoryResponse>(`/api/v1/scenarios/history?limit=${limit}`),
 
+  /** Generate a newspaper based on a scenario */
+  generateNewspaper: (data: { scenario_query: string; overall_score: number }) =>
+    request<{ success: boolean; data: any }>('/api/v1/scenarios/newspaper', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
   /** Get a specific scenario by ID */
   getScenario: (id: string) =>
     request<SimulationResponse>(`/api/v1/scenarios/${id}`),
@@ -92,4 +99,15 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  /** Create a short share link for a simulation result */
+  createShare: (result: any) =>
+    request<{ success: boolean; id: string }>('/api/v1/share', {
+      method: 'POST',
+      body: JSON.stringify({ result }),
+    }),
+
+  /** Retrieve a shared simulation result by short ID */
+  getShare: (id: string) =>
+    request<{ success: boolean; result: any }>(`/api/v1/share/${id}`),
 };

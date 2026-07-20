@@ -3,8 +3,8 @@ import { useAuth } from '../auth/AuthContext';
 import './Sidebar.css';
 
 interface SidebarProps {
-  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard';
-  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard') => void;
+  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk';
+  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk') => void;
   historyCount: number;
   isOpen?: boolean;
 }
@@ -57,6 +57,14 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
         >
           <span className="sidebar__btn-icon">🏆</span>
           <span style={{ fontWeight: 500, color: '#fbbf24' }}>{t('nav.leaderboard', 'Leaderboard')}</span>
+        </button>
+
+        <button
+          className={`sidebar__btn ${currentView === 'delay_risk' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('delay_risk')}
+        >
+          <span className="sidebar__btn-icon">⏳</span>
+          <span style={{ fontWeight: 500, color: '#a78bfa' }}>Delay Risk</span>
         </button>
 
         <button

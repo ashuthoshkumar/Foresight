@@ -692,6 +692,63 @@ class LLMService:
         logger.warning("All models failed for suggestions, returning fallback")
         return fallback
 
+    async def generate_newspaper(self, scenario_query: str, overall_score: float, city: str = "Hyderabad") -> dict:
+        """Generate a futuristic newspaper article based on the scenario simulation."""
+        fallback = {
+            "headline": "City Implements Sweeping Reforms",
+            "subheadline": f"The '{scenario_query}' initiative promises major changes.",
+            "article": f"In a surprising move, officials have moved forward with the '{scenario_query}' proposal. Experts debate the long-term feasibility, but early indicators suggest a massive shift in public infrastructure. The overall impact score of this initiative is tracking at {overall_score}/100.",
+            "opinion": "This could be the defining moment for our future, provided execution doesn't falter.",
+            "market_reaction": "Local markets show cautious optimism, with relevant sectors rallying slightly."
+        }
+
+        if not self.is_available:
+            return fallback
+
+        prompt = (
+            f"You are a top journalist living 5 years in the future in {city}.\n"
+            f"A major scenario was just fully implemented: '{scenario_query}'.\n"
+            f"The simulation engine gave this scenario an overall success/impact score of {overall_score}/100.\n\n"
+            f"Write a realistic, premium newspaper front page covering this event. Return ONLY a valid JSON object with these exact keys:\n"
+            f"- \"headline\": A catchy, realistic newspaper main headline.\n"
+            f"- \"subheadline\": A brief, factual sub-headline.\n"
+            f"- \"article\": A 2-paragraph news report detailing the immediate effects, public reaction, and long-term outlook (as if it actually happened). Use a serious, journalistic tone.\n"
+            f"- \"opinion\": A 1-sentence quote from a local citizen or expert.\n"
+            f"- \"market_reaction\": A 1-sentence summary of how the local economy or stock market reacted.\n\n"
+            f"Do NOT include markdown like ```json. Return just the raw JSON."
+        )
+
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
+
+        for model_name in models_to_try:
+            try:
+                response = self._client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.8,
+                    ),
+                )
+                result = json.loads(response.text)
+                if isinstance(result, dict) and "headline" in result:
+                    logger.info("Newspaper generated via %s", model_name)
+                    return result
+            except Exception as e:
+                err_str = str(e).lower()
+                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                    logger.warning("Model %s unavailable for newspaper, trying next...", model_name)
+                    continue
+                logger.error("Newspaper error on %s: %s", model_name, e)
+                break
+
+        logger.warning("All models failed for newspaper, returning fallback")
+        return fallback
+
 
 # ── Module-level singleton and exports ──────────────────────────────────────
 
