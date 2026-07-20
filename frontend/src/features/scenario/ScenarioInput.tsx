@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
+import { api } from '../../api/client';
 import './ScenarioInput.css';
 
 interface ScenarioInputProps {
@@ -13,7 +14,7 @@ interface ScenarioInputProps {
 export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialCompareMode = false }: ScenarioInputProps) {
   const { t } = useTranslation();
   
-  const EXAMPLES = useMemo(() => [
+  const defaultExamples = useMemo(() => [
     t('home.examples.ex1'),
     t('home.examples.ex2'),
     t('home.examples.ex3'),
@@ -28,6 +29,8 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
     t('home.placeholders.p4'),
   ], [t]);
 
+  const [examples, setExamples] = useState<string[]>(defaultExamples);
+  const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
   const [query, setQuery] = useState('');
   const [queryB, setQueryB] = useState('');
   const [isCompareMode, setIsCompareMode] = useState(initialCompareMode);
@@ -105,6 +108,20 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
     } else {
       setQuery(example);
       textareaRef.current?.focus();
+    }
+  };
+
+  const fetchIdeas = async () => {
+    setIsGeneratingIdeas(true);
+    try {
+      const res = await api.getSuggestions();
+      if (res.suggestions && res.suggestions.length > 0) {
+        setExamples(res.suggestions);
+      }
+    } catch (err) {
+      console.error("Failed to fetch suggestions:", err);
+    } finally {
+      setIsGeneratingIdeas(false);
     }
   };
 
@@ -220,7 +237,17 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
       </form>
 
       <div className="scenario-input__examples">
-        {EXAMPLES.map((example, i) => (
+        <button
+          className="scenario-input__example generate-ideas-btn"
+          onClick={fetchIdeas}
+          disabled={isLoading || isGeneratingIdeas}
+          type="button"
+          style={{ background: 'linear-gradient(90deg, rgba(6,182,212,0.1), rgba(124,58,237,0.1))', border: '1px dashed var(--border-accent)', color: 'var(--text-secondary)' }}
+        >
+          {isGeneratingIdeas ? <span className="spinner" style={{ width: '12px', height: '12px', marginRight: '6px' }} /> : '🧠 '}
+          {t('home.generateIdeas', 'Generate Ideas')}
+        </button>
+        {examples.map((example, i) => (
           <button
             key={i}
             className="scenario-input__example"

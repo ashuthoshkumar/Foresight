@@ -238,15 +238,17 @@
 }
 
 .scenario-input__example {
-  padding: 8px 16px;
+  padding: 10px 18px;
   background: var(--bg-glass);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-lg);
   color: var(--text-secondary);
   font-size: 0.82rem;
   cursor: pointer;
   transition: all var(--transition-base);
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.4;
+  text-align: left;
 }
 
 .scenario-input__example:hover {

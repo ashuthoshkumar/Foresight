@@ -643,11 +643,62 @@ class LLMService:
             "domain": "hyderabad_ev_traffic" if kg_data else "general",
         }
 
+    async def generate_suggestions(self, city: str = "Hyderabad", count: int = 3) -> list:
+        """Generate dynamic 'What If' AI scenario suggestions for a city."""
+        fallback = [
+            f"What if {city} banned single-use plastics next year?",
+            f"What if {city} made all public transport entirely free?",
+            f"What if {city} doubled its green cover by 2030?",
+        ]
 
-# Singleton instance
+        if not self.is_available:
+            return fallback
+
+        prompt = (
+            f"Generate exactly {count} creative, impactful, and realistic 'What If' policy or "
+            f"infrastructure scenarios for the city of {city}. "
+            f"Return ONLY a valid JSON array of strings. No markdown. No extra keys. "
+            f"Example: [\"What if {city} mandated solar panels on all new buildings?\"]"
+        )
+
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
+
+        for model_name in models_to_try:
+            try:
+                response = self._client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.8,
+                    ),
+                )
+                result = json.loads(response.text)
+                if isinstance(result, list) and len(result) > 0:
+                    logger.info("Suggestions generated via %s: %s items", model_name, len(result))
+                    return [str(s) for s in result[:count]]
+            except Exception as e:
+                err_str = str(e).lower()
+                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                    logger.warning("Model %s unavailable for suggestions, trying next...", model_name)
+                    continue
+                logger.error("Suggestions error on %s: %s", model_name, e)
+                break
+
+        logger.warning("All models failed for suggestions, returning fallback")
+        return fallback
+
+
+# ── Module-level singleton and exports ──────────────────────────────────────
+
 llm_service = LLMService()
 
-async def generate_chat_reply(scenario_query: str, message: str, history: list[Any]) -> str:
+
+async def generate_chat_reply(scenario_query: str, message: str, history: list) -> str:
     """Generate a chat reply using Gemini with multi-model fallback."""
     if llm_service.is_available:
         history_text = "\n".join([f"{msg.role.capitalize()}: {msg.content}" for msg in history])
@@ -662,7 +713,6 @@ async def generate_chat_reply(scenario_query: str, message: str, history: list[A
             f'User: {message}'
         )
 
-        # Try models in order — fallback if quota exceeded or model not found
         models_to_try = [
             "models/gemini-2.5-flash",
             "models/gemini-2.0-flash",
@@ -687,7 +737,7 @@ async def generate_chat_reply(scenario_query: str, message: str, history: list[A
 
         logger.error("All Gemini models exhausted for chat, using keyword fallback")
 
-    # Keyword fallback (only when ALL models fail)
+    # Keyword fallback
     message_lower = message.lower()
     q = scenario_query
     if "cost" in message_lower or "money" in message_lower or "budget" in message_lower or "financial" in message_lower:
@@ -702,3 +752,16 @@ async def generate_chat_reply(scenario_query: str, message: str, history: list[A
         return f"For '{q}': The biggest opportunity is first-mover advantage — establishing the region as a clean tech hub and attracting green investment and EV manufacturers."
     else:
         return f"For '{q}': This scenario has wide-ranging impacts across financial, environmental, and human dimensions. Could you be more specific? For example: costs, health outcomes, risks, or long-term opportunities?"
+
+
+async def generate_suggestions_standalone(city: str = "Hyderabad", count: int = 3) -> list:
+    """Module-level helper to generate AI scenario suggestions."""
+    return await llm_service.generate_suggestions(city=city, count=count)
+
+
+async def generate_chat_reply(message: str, scenario_query: str) -> str:
+    """Module-level helper to generate chat reply (wraps LLMService chat)."""
+    return await llm_service.generate_scenario_chat_reply(
+        message=message,
+        scenario_query=scenario_query,
+    )

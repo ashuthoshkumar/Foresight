@@ -12,7 +12,7 @@ from app.models.scenario import (
     ChatResponse,
 )
 from app.services.simulation import simulation_engine
-from app.services.llm_service import generate_chat_reply
+from app.services.llm_service import generate_chat_reply, llm_service
 from app.api.v1.middleware import get_optional_user
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
@@ -51,6 +51,20 @@ async def simulate_scenario(
             status_code=500,
             detail=f"Simulation failed: {str(e)}",
         )
+
+
+@router.get(
+    "/suggestions"
+)
+async def get_suggestions(city: str = "Hyderabad"):
+    """
+    Get dynamic AI-generated 'What If' scenarios for a city.
+    """
+    try:
+        suggestions = await llm_service.generate_suggestions(city=city)
+        return {"suggestions": suggestions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get(

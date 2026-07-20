@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { SimulationResult } from '../scenario/types';
 import RadarChart from './RadarChart';
@@ -10,6 +10,8 @@ import ReportCard from './ReportCard';
 import { generateProjections } from '../../utils/projection';
 import { exportToPDF } from '../../utils/exportPDF';
 import { exportImage } from '../../utils/exportImage';
+import { playSuccessChime, playWarningTone } from '../../utils/audio';
+import SmartAlert from './SmartAlert';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -23,6 +25,18 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [currentYear, setCurrentYear] = useState(2024);
   const [mapLayer, setMapLayer] = useState<'environmental' | 'financial' | 'human' | 'risks'>('environmental');
+  const [alertConfig, setAlertConfig] = useState<{ type: 'success' | 'warning', message: string } | null>(null);
+
+  // Trigger audio alert once on mount if score crosses thresholds
+  useEffect(() => {
+    if (result.overall_score >= 60) {
+      setAlertConfig({ type: 'success', message: 'Scenario indicates high opportunity and positive impact.' });
+      playSuccessChime();
+    } else {
+      setAlertConfig({ type: 'warning', message: 'Scenario indicates severe risks and negative compounding effects.' });
+      playWarningTone();
+    }
+  }, [result.overall_score]);
 
   const projections = useMemo(() => generateProjections(result, 2024, 2035), [result]);
   
@@ -186,6 +200,15 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
 
       {/* Hidden Report Card for Image Export */}
       <ReportCard result={currentResult} />
+
+      {/* Audio-Visual Smart Alert */}
+      {alertConfig && (
+        <SmartAlert 
+          type={alertConfig.type} 
+          message={alertConfig.message} 
+          onClose={() => setAlertConfig(null)} 
+        />
+      )}
     </div>
   );
 }

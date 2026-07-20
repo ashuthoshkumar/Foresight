@@ -39,6 +39,10 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  /** Get dynamic AI scenario suggestions */
+  getSuggestions: (city?: string) =>
+    request<{ suggestions: string[] }>(`/api/v1/scenarios/suggestions${city ? `?city=${city}` : ''}`),
+
   /** Get top scenarios from the community */
   getLeaderboard: () =>
     request<{ leaderboard: any[] }>('/api/v1/scenarios/leaderboard'),
