@@ -7,6 +7,8 @@
 
 Foresight goes far beyond basic LLM chatbots by integrating verifiable data, interactive visualizations, and deep multi-dimensional analysis.
 
+- **🎯 Goal-Seeker (Backcasting)**: Instead of "What If", set a massive future goal (e.g. "Zero traffic fatalities by 2030") and the AI will reverse-engineer a step-by-step policy and infrastructure roadmap to achieve it.
+- **📸 Future Vision Camera**: Automatically generates a highly specific, unique, photorealistic AI image of what the city streets will actually look like based on the simulated policy changes (powered by Pollinations AI & Gemini).
 - **🌐 Multi-Dimensional Impact Analysis**: Simulates impact across 5 critical axes: Financial, Environmental, Human, Risk, and Opportunity.
 - **⚔️ Scenario Battle Mode**: Pit two competing scenarios against each other (e.g. "Ban Petrol Cars" vs. "Make Public Transport Free") to see which wins across different metrics.
 - **🗺️ Live City Impact Map**: An interactive, animated map (built with Leaflet) visualizing the localized impact on different city zones.
