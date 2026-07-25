@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { api } from '../../api/client';
+import { SUPPORTED_CITIES } from '../scenario/types';
 import './ScenarioInput.css';
 
 interface ScenarioInputProps {
@@ -37,6 +38,31 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedCity, setSelectedCity] = useState('Hyderabad');
+
+  // Map cities to their localized names for proper string replacement
+  const localizedCities: Record<string, string> = useMemo(() => ({
+    'Hyderabad': t('cities.hyderabad', 'Hyderabad'),
+    'Bangalore': t('cities.bangalore', 'Bangalore'),
+    'Mumbai': t('cities.mumbai', 'Mumbai'),
+    'Delhi': t('cities.delhi', 'Delhi')
+  }), [t]);
+
+  // Update suggestions dynamically when city or language changes
+  useEffect(() => {
+    setExamples(defaultExamples.map(ex => {
+      let newEx = ex;
+      // We need to replace the default city name in the translation string with the currently selected localized city
+      // The default translations use 'Hyderabad' (or 'हैदराबाद' etc) as the base city.
+      const baseCityEn = 'Hyderabad';
+      const baseCityLoc = t('cities.hyderabad', 'Hyderabad');
+      const targetCityLoc = localizedCities[selectedCity] || selectedCity;
+      
+      newEx = newEx.replace(new RegExp(baseCityEn, 'g'), targetCityLoc);
+      newEx = newEx.replace(new RegExp(baseCityLoc, 'g'), targetCityLoc);
+      return newEx;
+    }));
+  }, [selectedCity, defaultExamples, localizedCities, t]);
 
   const handleVoiceResultA = useCallback((text: string) => {
     setQuery(prev => {
@@ -114,7 +140,7 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
   const fetchIdeas = async () => {
     setIsGeneratingIdeas(true);
     try {
-      const res = await api.getSuggestions();
+      const res = await api.getSuggestions(selectedCity);
       if (res.suggestions && res.suggestions.length > 0) {
         setExamples(res.suggestions);
       }
@@ -156,6 +182,21 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
 
 
       <form className="scenario-input__form" onSubmit={handleSubmit}>
+        {/* City Selector */}
+        <div className="scenario-input__city-selector">
+          {SUPPORTED_CITIES.map(city => (
+            <button
+              key={city.key}
+              type="button"
+              className={`scenario-input__city-btn ${selectedCity === city.key ? 'scenario-input__city-btn--active' : ''}`}
+              onClick={() => setSelectedCity(city.key)}
+              disabled={isLoading}
+            >
+              {city.emoji} {t(`cities.${city.key.toLowerCase()}`, city.key)}
+            </button>
+          ))}
+        </div>
+
         <div className="scenario-input__input-wrapper" style={{ display: 'flex', flexDirection: isCompareMode ? 'row' : 'column', gap: '1rem', background: 'none', border: 'none', padding: 0 }}>
           <div className="scenario-input__textarea-container" style={{ flex: 1, position: 'relative', background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', overflow: 'hidden' }}>
             {isCompareMode && <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-tertiary)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>Scenario A</div>}

@@ -262,4 +262,47 @@
   .scenario-input { padding: var(--space-xl) 0; }
   .scenario-input__examples { padding: 0 var(--space-md); }
   .scenario-input__example { font-size: 0.75rem; }
+  .scenario-input__city-selector { flex-wrap: wrap; }
+}
+
+/* ── City Selector ────────────────────────────────────────── */
+
+.scenario-input__city-selector {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.scenario-input__city-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.4);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.scenario-input__city-btn:hover {
+  border-color: rgba(6, 182, 212, 0.3);
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.scenario-input__city-btn--active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(124, 58, 237, 0.2));
+  border-color: rgba(6, 182, 212, 0.5);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+}
+
+.scenario-input__city-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

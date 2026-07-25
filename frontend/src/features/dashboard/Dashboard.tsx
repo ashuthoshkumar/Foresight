@@ -7,6 +7,7 @@ import ImpactMap from './ImpactMap';
 import TimelineProjection from './TimelineProjection';
 import FollowUpChat from './FollowUpChat';
 import ReportCard from './ReportCard';
+import CitizenPulse from './CitizenPulse';
 import { generateProjections } from '../../utils/projection';
 import { exportToPDF } from '../../utils/exportPDF';
 import { exportImage } from '../../utils/exportImage';
@@ -32,6 +33,8 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
   const [currentYear, setCurrentYear] = useState(2024);
   const [mapLayer, setMapLayer] = useState<'environmental' | 'financial' | 'human' | 'risks'>('environmental');
   const [alertConfig, setAlertConfig] = useState<{ type: 'success' | 'warning', message: string } | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isTogglingBookmark, setIsTogglingBookmark] = useState(false);
 
   // Trigger audio alert once on mount if score crosses thresholds
   useEffect(() => {
@@ -83,9 +86,28 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
     }
   };
 
-  const domainLabel = result.domain === 'hyderabad_ev_traffic'
-    ? '🏙️ Hyderabad EV/Traffic'
+  const domainLabel = result.domain?.includes('_ev_traffic')
+    ? `🏙️ ${result.city || 'City'} EV/Traffic`
     : `📋 ${result.domain}`;
+
+  // Check initial bookmark status
+  useEffect(() => {
+    api.getBookmarkStatus(result.id)
+      .then(res => setIsBookmarked(res.bookmarked))
+      .catch(() => {});
+  }, [result.id]);
+
+  const handleToggleBookmark = async () => {
+    setIsTogglingBookmark(true);
+    try {
+      const res = await api.toggleBookmark(result.id);
+      setIsBookmarked(res.bookmarked);
+    } catch (err) {
+      console.error('Bookmark toggle failed:', err);
+    } finally {
+      setIsTogglingBookmark(false);
+    }
+  };
 
   return (
     <div className="dashboard container">
@@ -132,11 +154,22 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               {isGeneratingNewspaper ? '📰 Writing...' : '📰 Read 2030 News'}
             </button>
             <ShareButton result={result} />
+            <button
+              className={`dashboard__export-btn dashboard__export-btn--bookmark ${isBookmarked ? 'dashboard__export-btn--bookmarked' : ''}`}
+              onClick={handleToggleBookmark}
+              disabled={isTogglingBookmark}
+              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this scenario'}
+            >
+              {isTogglingBookmark ? '⏳' : isBookmarked ? '⭐' : '☆'} {isBookmarked ? 'Saved' : 'Save'}
+            </button>
           </div>
           <div className="dashboard__query-label">{t('dashboard.scenarioAnalyzed')}</div>
           <h2 className="dashboard__query-text">{currentResult.query}</h2>
           <div className="dashboard__meta">
             <span className="dashboard__meta-domain">{domainLabel}</span>
+            {result.city && (
+              <span className="dashboard__meta-item">📍 {result.city}</span>
+            )}
             {currentResult.processing_time_ms && (
               <span className="dashboard__meta-item">
                 ⚡ {(currentResult.processing_time_ms / 1000).toFixed(1)}s
@@ -218,6 +251,13 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
           <ImpactCard key={impact.category} impact={impact} index={i} />
         ))}
       </div>
+
+      {/* Citizen Pulse — Stakeholder Personas */}
+      {currentResult.stakeholders && currentResult.stakeholders.length > 0 && (
+        <CitizenPulse stakeholders={currentResult.stakeholders} />
+      )}
+
+
 
       {/* Timeline Projection Component */}
       <TimelineProjection 

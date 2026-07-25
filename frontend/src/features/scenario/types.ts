@@ -20,6 +20,15 @@ export interface ImpactAxis {
   data_source: DataSource;
 }
 
+export interface StakeholderPersona {
+  name: string;
+  occupation: string;
+  age: number;
+  emoji: string;
+  quote: string;
+  impact: 'positive' | 'negative' | 'mixed';
+}
+
 export interface SimulationResult {
   id: string;
   query: string;
@@ -29,7 +38,9 @@ export interface SimulationResult {
   overall_score: number;
   parameters_used: Record<string, unknown>;
   domain: string;
+  city: string;
   processing_time_ms: number | null;
+  stakeholders: StakeholderPersona[];
 }
 
 export interface SimulationResponse {
@@ -39,7 +50,7 @@ export interface SimulationResponse {
 }
 
 export interface HistoryResponse {
-  success: boolean;
+  success?: boolean;
   scenarios: SimulationResult[];
   total: number;
 }
@@ -88,3 +99,10 @@ export const CATEGORY_META: Record<ImpactCategory, {
     gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
   },
 };
+
+export const SUPPORTED_CITIES = [
+  { key: 'Hyderabad', label: '🏛️ Hyderabad', emoji: '🏛️' },
+  { key: 'Delhi', label: '🏙️ Delhi', emoji: '🏙️' },
+  { key: 'Bangalore', label: '💻 Bangalore', emoji: '💻' },
+  { key: 'Mumbai', label: '🌊 Mumbai', emoji: '🌊' },
+] as const;

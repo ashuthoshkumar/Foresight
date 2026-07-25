@@ -29,8 +29,10 @@ COMBINED_ANALYSIS_PROMPT = """You are Foresight AI — an expert scenario analys
 Given a "what if" scenario, do TWO things in one response:
 1. Parse the scenario parameters
 2. Generate a full 5-axis impact analysis
+3. Generate 3-4 diverse citizen personas showing how this impacts real people
 
 Scenario: "{query}"
+City: {city}
 
 {kg_section}
 
@@ -39,10 +41,11 @@ Rules:
 - For missing data, use directional estimates (mark source: "llm_estimate")
 - Be specific with numbers/percentages
 - Scores: 0 (minimal) to 100 (transformative)
+- Stakeholder personas must be diverse (different ages, occupations, perspectives)
 
 Respond ONLY with this exact JSON (no markdown, no extra text):
 {{
-  "domain": "hyderabad_ev_traffic|general|business_finance|education|environment",
+  "domain": "hyderabad_ev_traffic|delhi_ev_traffic|bangalore_ev_traffic|mumbai_ev_traffic|general",
   "action": "string",
   "target": "string",
   "vehicle_type": "two_wheelers|four_wheelers|auto_rickshaws|all|null",
@@ -62,6 +65,16 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
           "source": "knowledge_graph|llm_estimate"
         }}
       ]
+    }}
+  ],
+  "stakeholders": [
+    {{
+      "name": "Full Name",
+      "occupation": "Job Title",
+      "age": 30,
+      "emoji": "sentiment emoji",
+      "quote": "First-person 1-2 sentence quote about how this personally affects them",
+      "impact": "positive|negative|mixed"
     }}
   ],
   "overall_summary": "2-sentence executive summary",
@@ -144,10 +157,11 @@ class LLMService:
         query: str,
         kg_data: Optional[dict[str, Any]] = None,
         language: str = "en",
+        city: str = "Hyderabad",
     ) -> dict[str, Any]:
         """Single combined LLM call: interpretation + impact analysis together."""
         if not self.is_available:
-            return self._fallback_analysis(query, kg_data, language)
+            return self._fallback_analysis(query, kg_data, language, city=city)
 
         # Build KG section
         if kg_data:
@@ -158,7 +172,7 @@ class LLMService:
         if language and language.lower() != "en":
             kg_section += f"\n\nIMPORTANT: Translate ALL text fields (summaries, metric names, explanations) to language: {language}"
 
-        prompt = COMBINED_ANALYSIS_PROMPT.format(query=query, kg_section=kg_section)
+        prompt = COMBINED_ANALYSIS_PROMPT.format(query=query, kg_section=kg_section, city=city)
 
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
@@ -168,11 +182,11 @@ class LLMService:
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         temperature=0.2,
-                        max_output_tokens=2048,
+                        max_output_tokens=3072,
                     ),
                 )
                 result = json.loads(response.text)
-                logger.info("Combined analysis done: score=%s domain=%s", result.get("overall_score"), result.get("domain"))
+                logger.info("Combined analysis done: score=%s domain=%s city=%s", result.get("overall_score"), result.get("domain"), city)
                 return result
 
             except Exception as e:
@@ -183,7 +197,7 @@ class LLMService:
                     await asyncio.sleep(wait)
                     continue
                 logger.error("Combined analysis failed after %d attempt(s): %s", attempt, e)
-                return self._fallback_analysis(query, kg_data, language)
+                return self._fallback_analysis(query, kg_data, language, city=city)
 
 
     async def generate_impact_analysis(
@@ -321,6 +335,7 @@ class LLMService:
         query: str,
         kg_data: Optional[dict[str, Any]] = None,
         language: str = "en",
+        city: str = "Hyderabad",
     ) -> dict[str, Any]:
         """
         Generate a smart, query-specific analysis when the LLM is unavailable.
@@ -630,7 +645,7 @@ class LLMService:
         note = " (Note: Gemini AI unavailable — using KG-grounded analysis)" if not kg_data else ""
 
         overall_summary = t(
-            f"{'Significantly positive' if overall_score > 65 else 'Mixed'} multi-dimensional impact from {action_word} {subject} in Hyderabad. "
+            f"{'Significantly positive' if overall_score > 65 else 'Mixed'} multi-dimensional impact from {action_word} {subject} in {city}. "
             f"Overall score of {overall_score}/100 across {len(impacts)} impact axes, "
             f"{'with strong KG-backed data for key metrics' if kg_data else 'estimated from domain knowledge'}."
             + note
@@ -640,7 +655,7 @@ class LLMService:
             "impacts": impacts,
             "overall_summary": overall_summary,
             "overall_score": overall_score,
-            "domain": "hyderabad_ev_traffic" if kg_data else "general",
+            "domain": "general",
         }
 
     async def generate_suggestions(self, city: str = "Hyderabad", count: int = 3) -> list:
@@ -749,6 +764,108 @@ class LLMService:
         logger.warning("All models failed for newspaper, returning fallback")
         return fallback
 
+    async def generate_butterfly_chain(
+        self,
+        scenario_query: str,
+        overall_score: float,
+        city: str = "Hyderabad",
+    ) -> dict:
+        """
+        Generate a causal chain of 2nd/3rd order unintended consequences.
+        Returns nodes and links for a force-directed graph visualization.
+        """
+        fallback_nodes = [
+            {"id": "root", "label": scenario_query[:60], "order": 0, "sentiment": "neutral", "size": 28},
+            {"id": "e1", "label": "Fuel station revenue drops 40%", "order": 1, "sentiment": "negative", "size": 20},
+            {"id": "e2", "label": "EV charging demand spikes", "order": 1, "sentiment": "positive", "size": 20},
+            {"id": "e3", "label": "Air quality improves 25%", "order": 1, "sentiment": "positive", "size": 20},
+            {"id": "e4", "label": f"Used vehicle black market emerges in {city}", "order": 2, "sentiment": "negative", "size": 16},
+            {"id": "e5", "label": "Power grid overload in peak hours", "order": 2, "sentiment": "negative", "size": 16},
+            {"id": "e6", "label": "Battery waste crisis by 2032", "order": 2, "sentiment": "negative", "size": 16},
+            {"id": "e7", "label": "Respiratory hospital visits fall 30%", "order": 2, "sentiment": "positive", "size": 16},
+            {"id": "e8", "label": "Mechanics forced to retrain", "order": 2, "sentiment": "negative", "size": 16},
+            {"id": "e9", "label": "Lithium mining demand surges globally", "order": 3, "sentiment": "negative", "size": 12},
+            {"id": "e10", "label": "Neighborhood noise drops 15dB", "order": 3, "sentiment": "positive", "size": 12},
+            {"id": "e11", "label": "Property values rise near metro", "order": 3, "sentiment": "positive", "size": 12},
+            {"id": "e12", "label": "Rural areas left behind in transition", "order": 3, "sentiment": "negative", "size": 12},
+        ]
+        fallback_links = [
+            {"source": "root", "target": "e1", "label": "causes"},
+            {"source": "root", "target": "e2", "label": "triggers"},
+            {"source": "root", "target": "e3", "label": "leads to"},
+            {"source": "e1", "target": "e4", "label": "spawns"},
+            {"source": "e1", "target": "e8", "label": "forces"},
+            {"source": "e2", "target": "e5", "label": "risks"},
+            {"source": "e2", "target": "e6", "label": "eventually causes"},
+            {"source": "e3", "target": "e7", "label": "results in"},
+            {"source": "e3", "target": "e10", "label": "also"},
+            {"source": "e6", "target": "e9", "label": "drives"},
+            {"source": "e7", "target": "e11", "label": "indirectly"},
+            {"source": "e5", "target": "e12", "label": "worsens"},
+        ]
+        fallback = {"nodes": fallback_nodes, "links": fallback_links}
+
+        if not self.is_available:
+            return fallback
+
+        prompt = (
+            f"You are an expert systems thinker analyzing unintended consequences.\n\n"
+            f"Scenario: \"{scenario_query}\" in {city} (impact score: {overall_score}/100).\n\n"
+            f"Generate a BUTTERFLY EFFECT causal chain showing 2nd and 3rd order consequences.\n"
+            f"Think about domino effects: what happens BECAUSE of what happens.\n\n"
+            f"Return ONLY valid JSON with this structure:\n"
+            f"{{\n"
+            f"  \"nodes\": [\n"
+            f"    {{\"id\": \"root\", \"label\": \"short scenario name\", \"order\": 0, \"sentiment\": \"neutral\", \"size\": 28}},\n"
+            f"    {{\"id\": \"e1\", \"label\": \"1st order effect\", \"order\": 1, \"sentiment\": \"positive|negative\", \"size\": 20}},\n"
+            f"    {{\"id\": \"e5\", \"label\": \"2nd order effect\", \"order\": 2, \"sentiment\": \"positive|negative\", \"size\": 16}},\n"
+            f"    {{\"id\": \"e9\", \"label\": \"3rd order effect\", \"order\": 3, \"sentiment\": \"positive|negative\", \"size\": 12}}\n"
+            f"  ],\n"
+            f"  \"links\": [\n"
+            f"    {{\"source\": \"root\", \"target\": \"e1\", \"label\": \"causes\"}}\n"
+            f"  ]\n"
+            f"}}\n\n"
+            f"Rules:\n"
+            f"- Generate exactly 12-15 nodes total: 1 root, 3-4 order-1, 4-5 order-2, 3-4 order-3\n"
+            f"- Each link must connect a lower-order node to a higher-order node\n"
+            f"- Labels must be specific, surprising, and data-grounded (not generic)\n"
+            f"- Mix positive and negative consequences\n"
+            f"- Include at least 2 truly surprising/unintuitive consequences\n"
+            f"- Use short labels (under 50 chars)\n"
+        )
+
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
+
+        for model_name in models_to_try:
+            try:
+                response = self._client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.7,
+                        max_output_tokens=2048,
+                    ),
+                )
+                result = json.loads(response.text)
+                if isinstance(result, dict) and "nodes" in result and "links" in result:
+                    logger.info("Butterfly effect chain generated via %s: %d nodes", model_name, len(result["nodes"]))
+                    return result
+            except Exception as e:
+                err_str = str(e).lower()
+                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                    logger.warning("Model %s unavailable for butterfly, trying next...", model_name)
+                    continue
+                logger.error("Butterfly effect error on %s: %s", model_name, e)
+                break
+
+        logger.warning("All models failed for butterfly effect, returning fallback")
+        return fallback
+
 
 # ── Module-level singleton and exports ──────────────────────────────────────
 
@@ -821,4 +938,13 @@ async def generate_chat_reply(message: str, scenario_query: str) -> str:
     return await llm_service.generate_scenario_chat_reply(
         message=message,
         scenario_query=scenario_query,
+    )
+
+
+async def generate_butterfly_effect(scenario_query: str, overall_score: float, city: str = "Hyderabad") -> dict:
+    """Generate a causal chain of unintended consequences for a scenario."""
+    return await llm_service.generate_butterfly_chain(
+        scenario_query=scenario_query,
+        overall_score=overall_score,
+        city=city,
     )

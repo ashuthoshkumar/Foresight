@@ -17,8 +17,10 @@ import KnowledgeGraph from './features/graph/KnowledgeGraph';
 import BattleMode from './features/battle/BattleMode';
 import Leaderboard from './features/community/Leaderboard';
 import DelayRiskPage from './features/delayrisk/DelayRiskPage';
+import Bookmarks from './features/bookmarks/Bookmarks';
+import ButterflyEffect from './features/dashboard/ButterflyEffect';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly';
 
 function AppContent() {
   const [view, setView] = useState<View>('home');
@@ -27,13 +29,16 @@ function AppContent() {
   const [history, setHistory] = useState<SimulationResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [butterflyStandaloneQuery, setButterflyStandaloneQuery] = useState('');
+  const [butterflyStandaloneCity, setButterflyStandaloneCity] = useState('Hyderabad');
+  const [butterflyStandaloneSubmit, setButterflyStandaloneSubmit] = useState(false);
   const { i18n } = useTranslation();
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const response = await api.getHistory();
-        if (response.success && response.scenarios) {
+        if (response.scenarios) {
           setHistory(response.scenarios);
         }
       } catch (err) {
@@ -132,7 +137,7 @@ function AppContent() {
       setError(null);
     }
     // Only close if it's not home, compare, battle, knowledge_graph, or leaderboard
-    if (v !== 'home' && v !== 'history' && v !== 'compare' && v !== 'knowledge_graph' && v !== 'battle' && v !== 'leaderboard' && v !== 'delay_risk') {
+    if (v !== 'home' && v !== 'history' && v !== 'compare' && v !== 'knowledge_graph' && v !== 'battle' && v !== 'leaderboard' && v !== 'delay_risk' && v !== 'bookmarks') {
         setIsSidebarOpen(false);
     } else {
         setIsSidebarOpen(true);
@@ -219,6 +224,87 @@ function AppContent() {
 
           {view === 'delay_risk' && (
             <DelayRiskPage />
+          )}
+
+          {view === 'bookmarks' && (
+            <Bookmarks onViewScenario={(result) => {
+              setCurrentResult(result);
+              setView('dashboard');
+              setIsSidebarOpen(false);
+            }} />
+          )}
+
+          {view === 'butterfly' && (
+            <div className="container" style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+              <div style={{ marginBottom: '2rem' }}>
+                <h1 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🦋 Butterfly Effect</h1>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  Trace the unintended 2nd and 3rd order consequences of your simulated scenarios across financial, social, and environmental dimensions.
+                </p>
+              </div>
+              
+              {!butterflyStandaloneSubmit && !currentResult ? (
+                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+                  <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Generate a Causal Chain</h3>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                    <input 
+                      type="text" 
+                      style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
+                      placeholder="e.g. What if petrol bikes are banned by 2030?" 
+                      value={butterflyStandaloneQuery}
+                      onChange={(e) => setButterflyStandaloneQuery(e.target.value)}
+                    />
+                    <select 
+                      style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', minWidth: '150px', outline: 'none' }}
+                      value={butterflyStandaloneCity}
+                      onChange={(e) => setButterflyStandaloneCity(e.target.value)}
+                    >
+                      <option value="Hyderabad">Hyderabad</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Bangalore">Bangalore</option>
+                      <option value="Mumbai">Mumbai</option>
+                    </select>
+                  </div>
+                  <button 
+                    style={{
+                      padding: '1rem 2rem',
+                      borderRadius: '12px',
+                      background: !butterflyStandaloneQuery.trim() ? 'rgba(255,255,255,0.05)' : 'var(--accent-primary)',
+                      color: !butterflyStandaloneQuery.trim() ? 'rgba(255,255,255,0.3)' : 'white',
+                      fontWeight: 600,
+                      border: 'none',
+                      cursor: !butterflyStandaloneQuery.trim() ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: !butterflyStandaloneQuery.trim() ? 'none' : '0 4px 15px rgba(6, 182, 212, 0.3)'
+                    }}
+                    disabled={!butterflyStandaloneQuery.trim()}
+                    onClick={() => setButterflyStandaloneSubmit(true)}
+                  >
+                    Simulate Feature
+                  </button>
+                </div>
+              ) : null}
+              
+              {(currentResult || butterflyStandaloneSubmit) && (
+                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', position: 'relative', marginTop: currentResult ? '0' : '2rem' }}>
+                  {butterflyStandaloneSubmit && !currentResult && (
+                    <button 
+                      onClick={() => { setButterflyStandaloneSubmit(false); setButterflyStandaloneQuery(''); }} 
+                      style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', zIndex: 10 }}
+                    >
+                      ✕ Reset
+                    </button>
+                  )}
+                  <ButterflyEffect
+                    scenarioQuery={currentResult ? currentResult.query : butterflyStandaloneQuery}
+                    overallScore={currentResult ? currentResult.overall_score : 50}
+                    city={currentResult ? currentResult.city : butterflyStandaloneCity}
+                    defaultExpanded={true}
+                    hideTrigger={true}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </main>
 

@@ -2,19 +2,21 @@
 
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 
 from app.models.scenario import (
     ErrorResponse,
-    HistoryResponse,
     ScenarioRequest,
     SimulationResponse,
+    SimulationResult,
     ChatRequest,
     ChatResponse,
     NewspaperRequest,
 )
 from app.services.simulation import simulation_engine
 from app.services.llm_service import generate_chat_reply, llm_service
-from app.api.v1.middleware import get_optional_user
+from app.services.database import db_service
+from app.api.v1.middleware import get_optional_user, get_current_user
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 
@@ -32,7 +34,7 @@ async def simulate_scenario(
 
     Accepts a natural language description and returns a multi-dimensional
     impact analysis across financial, environmental, human, risk, and
-    opportunity axes.
+    opportunity axes. Now with stakeholder personas and multi-city support.
     """
     try:
         parameters = request.parameters or {}
@@ -73,9 +75,18 @@ async def get_suggestions(city: str = "Hyderabad"):
 )
 async def get_leaderboard():
     """
-    Get top simulated/voted scenarios across the community.
-    Returns mock data for the demo.
+    Get top simulated scenarios from the database, ranked by score and popularity.
+    Falls back to seed data if no real data exists yet.
     """
+    try:
+        leaderboard = await db_service.get_leaderboard(limit=10)
+        if leaderboard:
+            return {"leaderboard": leaderboard}
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Leaderboard DB error: %s", e)
+
+    # Seed data fallback
     return {
         "leaderboard": [
             {
@@ -87,28 +98,28 @@ async def get_leaderboard():
             },
             {
                 "id": "scenario-lb-2",
-                "query": "What if TS-iPASS subsidies for IT companies are doubled?",
-                "domain": "Economic Policy",
+                "query": "What if Delhi made all public transport free?",
+                "domain": "Transport Policy",
                 "score": 78.5,
                 "popularity_count": 8945
             },
             {
                 "id": "scenario-lb-3",
-                "query": "What if Hussain Sagar lake area becomes a strictly pedestrian-only zone?",
-                "domain": "Urban Environment",
+                "query": "What if Bangalore doubled its metro network?",
+                "domain": "Urban Infrastructure",
                 "score": 92.0,
                 "popularity_count": 6512
             },
             {
                 "id": "scenario-lb-4",
-                "query": "What if all new residential buildings mandate solar roofing?",
+                "query": "What if Mumbai mandated solar roofing on all new buildings?",
                 "domain": "Energy & Real Estate",
                 "score": 88.5,
                 "popularity_count": 5231
             },
             {
                 "id": "scenario-lb-5",
-                "query": "What if the ORR toll rates are dynamically priced based on congestion?",
+                "query": "What if Hyderabad made the ORR toll dynamically priced?",
                 "domain": "Transport Infrastructure",
                 "score": 71.0,
                 "popularity_count": 4120
@@ -118,26 +129,72 @@ async def get_leaderboard():
 
 
 @router.get(
-    "/history",
-    response_model=HistoryResponse,
+    "/bookmarks",
 )
-async def get_history(limit: int = 50):
-    """Get past simulation scenarios, most recent first."""
-    scenarios = simulation_engine.get_history(limit=limit)
-    return HistoryResponse(scenarios=scenarios, total=len(scenarios))
+async def get_bookmarks(current_user: Dict[str, Any] = Depends(get_current_user)):
+    """Get all bookmarked scenarios for the current user."""
+    try:
+        bookmarks = await db_service.get_bookmarks(current_user["email"])
+        return {"success": True, "scenarios": bookmarks, "total": len(bookmarks)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post(
+    "/{scenario_id}/bookmark",
+)
+async def toggle_bookmark(
+    scenario_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """Toggle bookmark on a scenario. Returns the new bookmark state."""
+    try:
+        is_bookmarked = await db_service.toggle_bookmark(scenario_id, current_user["email"])
+        return {"success": True, "bookmarked": is_bookmarked}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/{scenario_id}/bookmark/status",
+)
+async def bookmark_status(
+    scenario_id: str,
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """Check if a scenario is bookmarked by the current user."""
+    if not current_user:
+        return {"bookmarked": False}
+    try:
+        is_bookmarked = await db_service.is_bookmarked(scenario_id, current_user["email"])
+        return {"bookmarked": is_bookmarked}
+    except Exception:
+        return {"bookmarked": False}
+
+
+@router.get(
+    "/history",
+)
+async def get_history(
+    limit: int = 50,
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """Get past simulation scenarios from the database, most recent first."""
+    user_email = current_user["email"] if current_user else None
+    scenarios = await simulation_engine.get_history(limit=limit, user_email=user_email)
+    return {"success": True, "scenarios": scenarios, "total": len(scenarios)}
 
 
 @router.get(
     "/{scenario_id}",
-    response_model=SimulationResponse,
     responses={404: {"model": ErrorResponse}},
 )
 async def get_scenario(scenario_id: str):
     """Retrieve a specific scenario by ID."""
-    result = simulation_engine.get_scenario(scenario_id)
+    result = await simulation_engine.get_scenario(scenario_id)
     if not result:
         raise HTTPException(status_code=404, detail="Scenario not found")
-    return SimulationResponse(result=result)
+    return {"success": True, "result": result}
 
 @router.post(
     "/chat",
@@ -175,4 +232,31 @@ async def generate_newspaper(request: NewspaperRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to generate newspaper: {str(e)}",
+        )
+
+
+class ButterflyRequest(BaseModel):
+    scenario_query: str
+    overall_score: float
+    city: str = "Hyderabad"
+
+
+@router.post(
+    "/butterfly",
+    responses={500: {"model": ErrorResponse}},
+)
+async def generate_butterfly(request: ButterflyRequest):
+    """Generate a butterfly effect causal chain for a scenario."""
+    try:
+        from app.services.llm_service import generate_butterfly_effect
+        chain = await generate_butterfly_effect(
+            scenario_query=request.scenario_query,
+            overall_score=request.overall_score,
+            city=request.city,
+        )
+        return {"success": True, "data": chain}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate butterfly effect: {str(e)}",
         )

@@ -2,11 +2,11 @@
 Simulation Engine — Orchestrates the full "What If" analysis pipeline.
 
 Pipeline:
-1. Interpret natural language scenario via LLM
-2. Query Knowledge Graph for relevant real-world data
+1. Detect city from query
+2. Query Knowledge Graph for relevant city-specific data
 3. Perform explainable calculations where data exists
-4. Use LLM for directional estimates where data gaps exist
-5. Compile results across all 5 impact axes
+4. Use LLM for impact analysis + stakeholder personas
+5. Persist to SQLite database
 """
 
 from __future__ import annotations
@@ -22,18 +22,17 @@ from app.models.scenario import (
     ImpactCategory,
     ImpactDetail,
     SimulationResult,
+    StakeholderPersona,
 )
 from app.services.knowledge_graph import knowledge_graph
 from app.services.llm_service import llm_service
+from app.services.database import db_service
 
 logger = logging.getLogger(__name__)
 
 
 class SimulationEngine:
     """Core simulation engine that combines KG calculations with LLM analysis."""
-
-    def __init__(self) -> None:
-        self._history: list[SimulationResult] = []
 
     async def simulate(
         self,
@@ -46,39 +45,57 @@ class SimulationEngine:
 
         logger.info("Starting simulation for: %s", query[:100])
 
-        # ── Step 1: Fast fallback interpretation (no LLM needed) ──
+        # ── Step 1: Detect city from query ──
+        domain, city_name = knowledge_graph.detect_city(query)
+        logger.info("Detected city: %s (domain: %s)", city_name, domain)
+
+        # ── Step 2: Fast fallback interpretation ──
         interpreted = llm_service._fallback_interpret(query)
+        # Override domain with detected city domain
+        if domain:
+            interpreted["domain"] = domain
+            interpreted["location"] = city_name
 
-        # ── Step 2: Query Knowledge Graph immediately ──
+        # ── Step 3: Query Knowledge Graph ──
         kg_calculations = None
-        domain = interpreted.get("domain", "general")
+        ev_keywords = ["ev", "electric", "petrol", "diesel", "bike", "car", "vehicle", "ban", "traffic", "transport", "bus", "metro"]
+        query_lower = query.lower()
+        is_ev_related = any(kw in query_lower for kw in ev_keywords)
 
-        if domain == "hyderabad_ev_traffic":
+        if domain and is_ev_related:
             vehicle_type = interpreted.get("vehicle_type", "two_wheelers") or "two_wheelers"
             timeline = interpreted.get("timeline")
             ban_year = int(timeline) if timeline and timeline.isdigit() else 2030
             kg_calculations = knowledge_graph.calculate_ev_ban_impact(
                 vehicle_type=vehicle_type,
                 ban_year=ban_year,
+                domain=domain,
             )
-            logger.info("KG calculations complete for %s", vehicle_type)
+            logger.info("KG calculations complete for %s in %s", vehicle_type, city_name)
 
-        # ── Step 3: Single combined LLM call ──
+        # ── Step 4: Single combined LLM call ──
         llm_analysis = await llm_service.analyze_scenario_combined(
             query=query,
             kg_data=kg_calculations,
             language=language,
+            city=city_name,
         )
 
-        # Update domain from LLM if it detected something different
         domain = llm_analysis.get("domain", domain)
 
-        # ── Step 4: Build structured result ──
+        # ── Step 5: Build structured result ──
         impacts = self._build_impacts(llm_analysis.get("impacts", []), language)
         overall_summary = llm_analysis.get("overall_summary", "Analysis complete.")
         overall_score = llm_analysis.get("overall_score", 50.0)
 
+        # Build stakeholder personas
+        stakeholders = self._build_stakeholders(
+            llm_analysis.get("stakeholders", []), city_name
+        )
+
         processing_time = (time.time() - start_time) * 1000
+
+        user_email = parameters.get("user_email")
 
         result = SimulationResult(
             query=query,
@@ -89,19 +106,82 @@ class SimulationEngine:
                 **parameters,
                 "interpreted": interpreted,
                 "domain": domain,
+                "city": city_name,
                 "kg_available": kg_calculations is not None,
             },
             domain=domain,
+            city=city_name,
             processing_time_ms=round(processing_time, 1),
+            stakeholders=stakeholders,
         )
 
-        self._history.append(result)
+        # Persist to database
+        try:
+            await db_service.save_scenario(result.model_dump(mode="json"), user_email)
+        except Exception as e:
+            logger.error("Failed to save scenario to DB: %s", e)
+
         logger.info(
-            "Simulation complete in %.0fms — score=%.1f, domain=%s",
-            processing_time, overall_score, domain,
+            "Simulation complete in %.0fms — score=%.1f, domain=%s, city=%s",
+            processing_time, overall_score, domain, city_name,
         )
         return result
 
+    def _build_stakeholders(
+        self, raw_stakeholders: list[dict[str, Any]], city: str
+    ) -> list[StakeholderPersona]:
+        """Convert raw LLM stakeholder data into typed models, with fallback."""
+        stakeholders = []
+        for raw in raw_stakeholders:
+            try:
+                stakeholders.append(StakeholderPersona(
+                    name=raw.get("name", "Citizen"),
+                    occupation=raw.get("occupation", "Resident"),
+                    age=int(raw.get("age", 30)),
+                    emoji=raw.get("emoji", "😐"),
+                    quote=raw.get("quote", "This policy will affect my daily life."),
+                    impact=raw.get("impact", "mixed"),
+                ))
+            except Exception as e:
+                logger.warning("Skipping malformed stakeholder: %s", e)
+
+        # If LLM didn't return any, generate fallbacks
+        if not stakeholders:
+            stakeholders = [
+                StakeholderPersona(
+                    name="Priya Sharma",
+                    occupation="Local Café Owner",
+                    age=34,
+                    emoji="😰",
+                    quote=f"My delivery costs in {city} could change dramatically. I need time to adapt my business model.",
+                    impact="negative",
+                ),
+                StakeholderPersona(
+                    name="Rahul Verma",
+                    occupation="Daily Commuter",
+                    age=28,
+                    emoji="😊",
+                    quote=f"If this means cleaner air and better public transport in {city}, I'm all for it!",
+                    impact="positive",
+                ),
+                StakeholderPersona(
+                    name="Sunita Devi",
+                    occupation="Auto Driver",
+                    age=45,
+                    emoji="😤",
+                    quote=f"Nobody asked us before making these decisions. How will I feed my family during the transition?",
+                    impact="negative",
+                ),
+                StakeholderPersona(
+                    name="Dr. Arun Nair",
+                    occupation="Public Health Researcher",
+                    age=52,
+                    emoji="🤔",
+                    quote=f"The health benefits are promising but will take 3-5 years to materialize in {city}'s population data.",
+                    impact="mixed",
+                ),
+            ]
+        return stakeholders
 
     def _build_impacts(self, raw_impacts: list[dict[str, Any]], language: str = "en") -> list[ImpactAxis]:
         """Convert raw LLM/fallback analysis into typed ImpactAxis models."""
@@ -170,22 +250,13 @@ class SimulationEngine:
 
         return impacts
 
-    def get_history(self, limit: int = 50) -> list[SimulationResult]:
-        """Get simulation history, most recent first."""
-        return list(reversed(self._history[-limit:]))
+    async def get_history(self, limit: int = 50, user_email: Optional[str] = None) -> list[dict]:
+        """Get simulation history from database."""
+        return await db_service.get_history(limit=limit, user_email=user_email)
 
-    def get_scenario(self, scenario_id: str) -> Optional[SimulationResult]:
-        """Find a specific scenario by ID."""
-        for result in self._history:
-            if result.id == scenario_id:
-                return result
-        return None
-
-    def clear_history(self) -> int:
-        """Clear all history. Returns count of cleared items."""
-        count = len(self._history)
-        self._history.clear()
-        return count
+    async def get_scenario(self, scenario_id: str) -> Optional[dict]:
+        """Find a specific scenario by ID from database."""
+        return await db_service.get_scenario(scenario_id)
 
 
 # Singleton instance

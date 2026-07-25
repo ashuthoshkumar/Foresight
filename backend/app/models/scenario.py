@@ -54,6 +54,16 @@ class ScenarioRequest(BaseModel):
     )
 
 
+class StakeholderPersona(BaseModel):
+    """A citizen persona affected by the scenario."""
+    name: str = Field(..., description="Full name of the persona")
+    occupation: str = Field(..., description="Job or role")
+    age: int = Field(default=30, ge=15, le=85)
+    emoji: str = Field(default="😐", description="Sentiment emoji")
+    quote: str = Field(..., description="First-person quote about the impact")
+    impact: str = Field(default="mixed", description="positive | negative | mixed")
+
+
 # ── Response Models ─────────────────────────────────────────────
 
 
@@ -100,7 +110,9 @@ class SimulationResult(BaseModel):
     )
     parameters_used: dict[str, Any] = Field(default_factory=dict)
     domain: str = Field(default="general", description="Detected scenario domain")
+    city: str = Field(default="Hyderabad", description="City the scenario targets")
     processing_time_ms: Optional[float] = None
+    stakeholders: list[StakeholderPersona] = Field(default_factory=list, description="Citizen personas impacted by this scenario")
 
 
 class SimulationResponse(BaseModel):

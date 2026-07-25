@@ -13,7 +13,11 @@ const resources = {
         battle: 'Battle Mode',
         graph: 'Knowledge Graph',
         history: 'History',
-        leaderboard: 'Leaderboard'
+        leaderboard: 'Leaderboard',
+        butterfly: 'Butterfly Effect',
+        delayRisk: 'Delay Risk',
+        saved: 'Saved',
+        menu: 'Menu'
       },
       home: {
         poweredBy: 'Powered by AI + Real Data',
@@ -28,6 +32,7 @@ const resources = {
           ex4: 'What if EV charging stations tripled in Hyderabad next year?',
           ex5: 'What if Hyderabad imposed congestion pricing in the city center?'
         },
+        generateIdeas: 'Generate Ideas',
         placeholders: {
           p1: 'What if Hyderabad banned petrol bikes by 2030?',
           p2: 'What if every school switched to electric buses?',
@@ -91,6 +96,12 @@ const resources = {
         registerSuccess: 'Successfully registered',
         logoutSuccess: 'Successfully signed out'
       },
+      cities: {
+        hyderabad: 'Hyderabad',
+        delhi: 'Delhi',
+        bangalore: 'Bangalore',
+        mumbai: 'Mumbai'
+      },
       leaderboard: {
         title: 'Community Leaderboard',
         subtitle: 'Discover and simulate the most impactful scenarios explored by the community.',
@@ -135,7 +146,11 @@ const resources = {
         battle: 'बैटल मोड',
         graph: 'नॉलेज ग्राफ',
         history: 'इतिहास',
-        leaderboard: 'लीडरबोर्ड'
+        leaderboard: 'लीडरबोर्ड',
+        butterfly: 'बटरफ्लाई प्रभाव',
+        delayRisk: 'विलंब जोखिम',
+        saved: 'सहेजे गए',
+        menu: 'मेनू'
       },
       auth: {
         signIn: 'साइन इन करें',
@@ -153,6 +168,12 @@ const resources = {
         registerSuccess: 'सफलतापूर्वक पंजीकृत',
         logoutSuccess: 'सफलतापूर्वक साइन आउट किया गया'
       },
+      cities: {
+        hyderabad: 'हैदराबाद',
+        delhi: 'दिल्ली',
+        bangalore: 'बैंगलोर',
+        mumbai: 'मुंबई'
+      },
       home: {
         poweredBy: 'एआई + वास्तविक डेटा द्वारा संचालित',
         exploreFuture: 'घटित होने से पहले <1>भविष्य</1> का अन्वेषण करें',
@@ -166,6 +187,7 @@ const resources = {
           ex4: 'क्या हो अगर अगले साल हैदराबाद में ईवी चार्जिंग स्टेशन तीन गुना हो जाएं?',
           ex5: 'क्या हो अगर हैदराबाद सिटी सेंटर में कंजेशन प्राइसिंग लागू करे?'
         },
+        generateIdeas: 'विचार उत्पन्न करें',
         placeholders: {
           p1: 'क्या हो अगर हैदराबाद 2030 तक पेट्रोल बाइक पर प्रतिबंध लगा दे?',
           p2: 'क्या हो अगर हर स्कूल इलेक्ट्रिक बसों में बदल जाए?',
@@ -257,7 +279,33 @@ const resources = {
         battle: 'బాటిల్ మోడ్',
         graph: 'నాలెడ్జ్ గ్రాఫ్',
         history: 'చరిత్ర',
-        leaderboard: 'లీడర్‌బోర్డ్'
+        leaderboard: 'లీడర్‌బోర్డ్',
+        butterfly: 'బటర్‌ఫ్లై ఎఫెక్ట్',
+        delayRisk: 'ఆలస్యం ప్రమాదం',
+        saved: 'సేవ్ చేయబడింది',
+        menu: 'మెను'
+      },
+      auth: {
+        signIn: 'సైన్ ఇన్ చేయండి',
+        signOut: 'సైన్ అవుట్',
+        login: 'లాగిన్',
+        register: 'నమోదు చేయండి',
+        email: 'ఇమెయిల్',
+        password: 'పాస్‌వర్డ్',
+        name: 'పేరు',
+        welcomeBack: '✨ తిరిగి స్వాగతం, {{name}}',
+        dontHaveAccount: 'ఖాతా లేదా?',
+        alreadyHaveAccount: 'ఇప్పటికే ఖాతా ఉందా?',
+        creatingAccount: 'ఖాతాను సృష్టిస్తోంది...',
+        signingIn: 'సైన్ ఇన్ అవుతోంది...',
+        registerSuccess: 'విజయవంతంగా నమోదు చేయబడింది',
+        logoutSuccess: 'విజయవంతంగా సైన్ అవుట్ చేయబడింది'
+      },
+      cities: {
+        hyderabad: 'హైదరాబాద్',
+        delhi: 'ఢిల్లీ',
+        bangalore: 'బెంగళూరు',
+        mumbai: 'ముంబై'
       },
       home: {
         poweredBy: 'AI + రియల్ డేటాతో పవర్ చేయబడింది',
@@ -272,6 +320,7 @@ const resources = {
           ex4: 'వచ్చే ఏడాది హైదరాబాద్‌లో EV ఛార్జింగ్ స్టేషన్లు మూడు రెట్లు పెరిగితే ఏమి జరుగుతుంది?',
           ex5: 'హైదరాబాద్ సిటీ సెంటర్‌లో రద్దీ ధరలను విధిస్తే ఏమి జరుగుతుంది?'
         },
+        generateIdeas: 'ఆలోచనలను రూపొందించండి',
         placeholders: {
           p1: 'హైదరాబాద్ 2030 నాటికి పెట్రోల్ బైక్‌లను నిషేధిస్తే ఏమి జరుగుతుంది?',
           p2: 'ప్రతి పాఠశాల ఎలక్ట్రిక్ బస్సులకు మారితే ఏమి జరుగుతుంది?',

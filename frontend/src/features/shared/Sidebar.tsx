@@ -3,8 +3,8 @@ import { useAuth } from '../auth/AuthContext';
 import './Sidebar.css';
 
 interface SidebarProps {
-  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk';
-  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk') => void;
+  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly';
+  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly') => void;
   historyCount: number;
   isOpen?: boolean;
 }
@@ -24,7 +24,7 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
       </div>
 
       <nav className="sidebar__nav">
-        <div className="sidebar__section-title">Menu</div>
+        <div className="sidebar__section-title">{t('nav.menu', 'Menu')}</div>
         
         <button
           className={`sidebar__btn ${currentView === 'home' || currentView === 'loading' || currentView === 'dashboard' ? 'sidebar__btn--active' : ''}`}
@@ -60,11 +60,28 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
         </button>
 
         <button
+          className={`sidebar__btn ${currentView === 'butterfly' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('butterfly')}
+          style={currentView !== 'butterfly' ? { background: 'linear-gradient(90deg, rgba(124,58,237,0.05), transparent)' } : { background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(236,72,153,0.2))', borderColor: 'rgba(124,58,237,0.4)' }}
+        >
+          <span className="sidebar__btn-icon">🦋</span>
+          <span style={{ fontWeight: 600, background: 'linear-gradient(135deg, #a855f7, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{t('nav.butterfly', 'Butterfly Effect')}</span>
+        </button>
+
+        <button
           className={`sidebar__btn ${currentView === 'delay_risk' ? 'sidebar__btn--active' : ''}`}
           onClick={() => onViewChange('delay_risk')}
         >
           <span className="sidebar__btn-icon">⏳</span>
-          <span style={{ fontWeight: 500, color: '#a78bfa' }}>Delay Risk</span>
+          <span style={{ fontWeight: 500, color: '#a78bfa' }}>{t('nav.delayRisk', 'Delay Risk')}</span>
+        </button>
+
+        <button
+          className={`sidebar__btn ${currentView === 'bookmarks' ? 'sidebar__btn--active' : ''}`}
+          onClick={() => onViewChange('bookmarks')}
+        >
+          <span className="sidebar__btn-icon">⭐</span>
+          <span style={{ fontWeight: 500, color: '#fbbf24' }}>{t('nav.saved', 'Saved')}</span>
         </button>
 
         <button
@@ -96,7 +113,7 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
             </div>
           </div>
           <button className="sidebar__auth-btn sidebar__auth-btn--logout" onClick={logout}>
-            {t('auth.logout', 'Sign Out')}
+            {t('auth.signOut', 'Sign Out')}
           </button>
         </div>
         

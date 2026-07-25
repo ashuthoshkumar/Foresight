@@ -14,6 +14,7 @@ from app.api.v1.router import router as v1_router
 from app.config import get_settings
 from app.services.knowledge_graph import knowledge_graph
 from app.services.llm_service import llm_service
+from app.services.database import db_service
 
 # Configure logging
 logging.basicConfig(
@@ -29,6 +30,10 @@ async def lifespan(app: FastAPI):
     """Application lifecycle — initialize services on startup."""
     settings = get_settings()
     logger.info("🚀 Starting Foresight v%s", settings.app_version)
+
+    # Initialize Database
+    await db_service.initialize()
+    logger.info("💾 Database initialized")
 
     # Initialize Knowledge Graph
     knowledge_graph.initialize()

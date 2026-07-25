@@ -110,4 +110,25 @@ export const api = {
   /** Retrieve a shared simulation result by short ID */
   getShare: (id: string) =>
     request<{ success: boolean; result: any }>(`/api/v1/share/${id}`),
+
+  /** Toggle bookmark on a scenario */
+  toggleBookmark: (scenarioId: string) =>
+    request<{ success: boolean; bookmarked: boolean }>(`/api/v1/scenarios/${scenarioId}/bookmark`, {
+      method: 'POST',
+    }),
+
+  /** Get all bookmarked scenarios */
+  getBookmarks: () =>
+    request<{ success: boolean; scenarios: any[]; total: number }>('/api/v1/scenarios/bookmarks'),
+
+  /** Check bookmark status */
+  getBookmarkStatus: (scenarioId: string) =>
+    request<{ bookmarked: boolean }>(`/api/v1/scenarios/${scenarioId}/bookmark/status`),
+
+  /** Generate butterfly effect causal chain */
+  generateButterfly: (data: { scenario_query: string; overall_score: number; city?: string }) =>
+    request<{ success: boolean; data: { nodes: any[]; links: any[] } }>('/api/v1/scenarios/butterfly', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
