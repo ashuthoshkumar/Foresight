@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client';
 import type { SimulationResult, ImpactCategory } from '../scenario/types';
 import { CATEGORY_META } from '../scenario/types';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 import './BattleMode.css';
 
 type BattlePhase = 'setup' | 'fighting' | 'result';
@@ -23,6 +24,9 @@ export default function BattleMode({ onBack }: BattleModeProps) {
 
   // Fighting animation state
   const [fightStep, setFightStep] = useState(0);
+
+  const voiceA = useVoiceInput((text) => setQueryA(prev => prev.trim() ? prev + ' ' + text : text));
+  const voiceB = useVoiceInput((text) => setQueryB(prev => prev.trim() ? prev + ' ' + text : text));
 
   useEffect(() => {
     if (phase === 'fighting') {
@@ -93,7 +97,16 @@ export default function BattleMode({ onBack }: BattleModeProps) {
 
       <div className="battle-setup__arena">
         <div className="battle-card battle-card--a">
-          <div className="battle-card__label">{t('battle.fighterA', 'Fighter A')}</div>
+          <div className="battle-card__label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{t('battle.fighterA', 'Fighter A')}</span>
+            <button 
+              type="button" 
+              onClick={voiceA.toggleListening}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: voiceA.isListening ? 1 : 0.6, transition: '0.2s' }}
+            >
+              {voiceA.isListening ? '🛑' : '🎙️'}
+            </button>
+          </div>
           <textarea
             className="battle-card__textarea"
             placeholder={t('battle.placeholderA', 'e.g., What if we ban all private cars in the city center?')}
@@ -109,7 +122,16 @@ export default function BattleMode({ onBack }: BattleModeProps) {
         </div>
 
         <div className="battle-card battle-card--b">
-          <div className="battle-card__label">{t('battle.fighterB', 'Fighter B')}</div>
+          <div className="battle-card__label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{t('battle.fighterB', 'Fighter B')}</span>
+            <button 
+              type="button" 
+              onClick={voiceB.toggleListening}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: voiceB.isListening ? 1 : 0.6, transition: '0.2s' }}
+            >
+              {voiceB.isListening ? '🛑' : '🎙️'}
+            </button>
+          </div>
           <textarea
             className="battle-card__textarea"
             placeholder={t('battle.placeholderB', 'e.g., What if we make public transport entirely free?')}

@@ -1,7 +1,8 @@
 /* ── History ────────────────────────────────────────────────── */
 
 .history {
-  padding: var(--space-2xl) 0;
+  padding-top: var(--space-2xl);
+  padding-bottom: var(--space-2xl);
   animation: fadeIn 0.5s ease-out;
 }
 

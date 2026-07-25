@@ -20,6 +20,7 @@ import DelayRiskPage from './features/delayrisk/DelayRiskPage';
 import Bookmarks from './features/bookmarks/Bookmarks';
 import ButterflyEffect from './features/dashboard/ButterflyEffect';
 import GoalRoadmap from './features/scenario/GoalRoadmap';
+import { useVoiceInput } from './hooks/useVoiceInput';
 
 type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
 
@@ -35,6 +36,8 @@ function AppContent() {
   const [butterflyStandaloneCity, setButterflyStandaloneCity] = useState('Hyderabad');
   const [butterflyStandaloneSubmit, setButterflyStandaloneSubmit] = useState(false);
   const { i18n } = useTranslation();
+
+  const voiceButterfly = useVoiceInput((text) => setButterflyStandaloneQuery(prev => prev.trim() ? prev + ' ' + text : text));
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -274,13 +277,22 @@ function AppContent() {
                 <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
                   <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Generate a Causal Chain</h3>
                   <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-                    <input 
-                      type="text" 
-                      style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
-                      placeholder="e.g. What if petrol bikes are banned by 2030?" 
-                      value={butterflyStandaloneQuery}
-                      onChange={(e) => setButterflyStandaloneQuery(e.target.value)}
-                    />
+                    <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+                      <input 
+                        type="text" 
+                        style={{ width: '100%', padding: '1rem', paddingRight: '3rem', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none' }}
+                        placeholder="e.g. What if petrol bikes are banned by 2030?" 
+                        value={butterflyStandaloneQuery}
+                        onChange={(e) => setButterflyStandaloneQuery(e.target.value)}
+                      />
+                      <button 
+                        type="button"
+                        onClick={voiceButterfly.toggleListening}
+                        style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: voiceButterfly.isListening ? 1 : 0.6, transition: '0.2s' }}
+                      >
+                        {voiceButterfly.isListening ? '🛑' : '🎙️'}
+                      </button>
+                    </div>
                     <select 
                       style={{ padding: '1rem', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', minWidth: '150px', outline: 'none' }}
                       value={butterflyStandaloneCity}

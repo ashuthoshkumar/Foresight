@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { api } from '../../api/client';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 import './FollowUpChat.css';
 
 interface FollowUpChatProps {
@@ -16,6 +17,15 @@ export default function FollowUpChat({ scenarioQuery }: FollowUpChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  const handleVoiceResult = useCallback((text: string) => {
+    setInput(prev => {
+      const p = prev.trim();
+      return p ? p + ' ' + text : text;
+    });
+  }, []);
+
+  const voice = useVoiceInput(handleVoiceResult);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -123,6 +133,19 @@ export default function FollowUpChat({ scenarioQuery }: FollowUpChatProps) {
         </div>
 
         <div className="followup-chat__input-area">
+          <button 
+            type="button"
+            className="followup-chat__voice-btn"
+            onClick={voice.toggleListening}
+            title="Dictate message"
+            style={{ 
+              background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', 
+              padding: '0 8px', color: voice.isListening ? '#ef4444' : 'var(--text-secondary)',
+              transition: '0.2s', alignSelf: 'flex-end', marginBottom: '8px'
+            }}
+          >
+            {voice.isListening ? '🛑' : '🎙️'}
+          </button>
           <textarea
             className="followup-chat__input"
             value={input}
