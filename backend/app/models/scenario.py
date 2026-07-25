@@ -54,6 +54,19 @@ class ScenarioRequest(BaseModel):
     )
 
 
+class GoalSeekRequest(BaseModel):
+    """Input model for creating a goal-seeking roadmap."""
+    goal: str = Field(..., min_length=5, max_length=1000)
+    city: str = Field(default="Hyderabad")
+    timeline: str = Field(default="2030")
+
+class VisionRequest(BaseModel):
+    """Input model for generating a future vision image."""
+    scenario_summary: str = Field(..., min_length=5)
+    city: str = Field(default="Hyderabad")
+    scenario_query: str = Field(default="", description="The original user query for context")
+
+
 class StakeholderPersona(BaseModel):
     """A citizen persona affected by the scenario."""
     name: str = Field(..., description="Full name of the persona")

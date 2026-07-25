@@ -8,11 +8,12 @@ import './ScenarioInput.css';
 interface ScenarioInputProps {
   onSubmit: (query: string) => void;
   onCompare?: (queryA: string, queryB: string) => void;
+  onGoalSeek?: (goal: string, city: string, timeline: string) => void;
   isLoading: boolean;
   initialCompareMode?: boolean;
 }
 
-export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialCompareMode = false }: ScenarioInputProps) {
+export default function ScenarioInput({ onSubmit, onCompare, onGoalSeek, isLoading, initialCompareMode = false }: ScenarioInputProps) {
   const { t } = useTranslation();
   
   const defaultExamples = useMemo(() => [
@@ -39,6 +40,10 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [selectedCity, setSelectedCity] = useState('Hyderabad');
+  
+  // Goal Seeker mode
+  const [isGoalSeekMode, setIsGoalSeekMode] = useState(false);
+  const [timeline, setTimeline] = useState('2030');
 
   // Map cities to their localized names for proper string replacement
   const localizedCities: Record<string, string> = useMemo(() => ({
@@ -117,7 +122,11 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
     e.preventDefault();
     if (isLoading) return;
     
-    if (isCompareMode && onCompare) {
+    if (isGoalSeekMode && onGoalSeek) {
+      if (query.trim().length >= 5) {
+        onGoalSeek(query.trim(), selectedCity, timeline);
+      }
+    } else if (isCompareMode && onCompare) {
       if (query.trim().length >= 10 && queryB.trim().length >= 10) {
         onCompare(query.trim(), queryB.trim());
       }
@@ -129,7 +138,10 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
   };
 
   const handleExampleClick = (example: string) => {
-    if (isCompareMode && query.trim().length > 0) {
+    if (isGoalSeekMode) {
+      setQuery(example);
+      textareaRef.current?.focus();
+    } else if (isCompareMode && query.trim().length > 0) {
       setQueryB(example);
     } else {
       setQuery(example);
@@ -158,25 +170,51 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
     }
   };
   
-  const canSubmit = isCompareMode 
-    ? query.trim().length >= 10 && queryB.trim().length >= 10
-    : query.trim().length >= 10;
+  const canSubmit = isGoalSeekMode
+    ? query.trim().length >= 5
+    : isCompareMode 
+      ? query.trim().length >= 10 && queryB.trim().length >= 10
+      : query.trim().length >= 10;
 
   return (
     <section className="scenario-input container">
       <div className="scenario-input__hero">
         <div className="scenario-input__badge">
           <span className="scenario-input__badge-dot" />
-          {t('home.poweredBy')}
+          {isGoalSeekMode ? "Goal Seeker" : t('home.poweredBy')}
         </div>
         <h1 className="scenario-input__title">
-          <Trans i18nKey="home.exploreFuture">
-            Explore the <span className="gradient-text">Future</span> Before It Happens
-          </Trans>
+          {isGoalSeekMode ? (
+            <>Reverse-Engineer the <span className="gradient-text">Future</span></>
+          ) : (
+            <Trans i18nKey="home.exploreFuture">
+              Explore the <span className="gradient-text">Future</span> Before It Happens
+            </Trans>
+          )}
         </h1>
         <p className="scenario-input__subtitle">
-          {t('home.subtitle')}
+          {isGoalSeekMode 
+            ? "Set an ambitious goal for your city, and the AI will generate the step-by-step roadmap to achieve it." 
+            : t('home.subtitle')}
         </p>
+        
+        {/* Toggle Mode */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '30px', display: 'flex', gap: '4px' }}>
+            <button 
+              onClick={() => { setIsGoalSeekMode(false); setIsCompareMode(false); }}
+              style={{ padding: '8px 16px', borderRadius: '24px', background: !isGoalSeekMode && !isCompareMode ? 'rgba(255,255,255,0.1)' : 'transparent', color: !isGoalSeekMode && !isCompareMode ? '#fff' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
+            >
+              Simulate
+            </button>
+            <button 
+              onClick={() => { setIsGoalSeekMode(true); setIsCompareMode(false); }}
+              style={{ padding: '8px 16px', borderRadius: '24px', background: isGoalSeekMode ? 'rgba(255,255,255,0.1)' : 'transparent', color: isGoalSeekMode ? '#fff' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
+            >
+              🎯 Goal Seeker
+            </button>
+          </div>
+        </div>
       </div>
 
 
@@ -197,6 +235,34 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
           ))}
         </div>
 
+        {isGoalSeekMode && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Target Year:</span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {['2030', '2035', '2040', '2050'].map(year => (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => setTimeline(year)}
+                  style={{
+                    padding: '6px 16px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: timeline === year ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                    color: timeline === year ? '#fff' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: timeline === year ? 600 : 400,
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="scenario-input__input-wrapper" style={{ display: 'flex', flexDirection: isCompareMode ? 'row' : 'column', gap: '1rem', background: 'none', border: 'none', padding: 0 }}>
           <div className="scenario-input__textarea-container" style={{ flex: 1, position: 'relative', background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', overflow: 'hidden' }}>
             {isCompareMode && <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--text-tertiary)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>Scenario A</div>}
@@ -208,7 +274,7 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isCompareMode ? t('compare.placeholderA', 'e.g., Offer 10% EV Subsidy') : displayedPlaceholder}
+              placeholder={isGoalSeekMode ? "e.g., Achieve zero traffic fatalities" : (isCompareMode ? t('compare.placeholderA', 'e.g., Offer 10% EV Subsidy') : displayedPlaceholder)}
               maxLength={1000}
               disabled={isLoading}
             />
@@ -264,7 +330,9 @@ export default function ScenarioInput({ onSubmit, onCompare, isLoading, initialC
             style={isCompareMode ? { background: 'linear-gradient(135deg, rgba(6,182,212,0.8), rgba(124,58,237,0.8))' } : {}}
           >
             {isLoading ? (
-              <>⏳ {t('home.simulating')}</>
+              <>⏳ {isGoalSeekMode ? 'Generating Roadmap...' : t('home.simulating')}</>
+            ) : isGoalSeekMode ? (
+              <>🎯 Generate Goal Roadmap</>
             ) : isCompareMode ? (
               <>
                 <span className="scenario-input__submit-icon">⚖️</span>

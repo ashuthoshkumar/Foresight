@@ -17,6 +17,7 @@ import { FutureNewspaper } from '../newspaper/FutureNewspaper';
 import AIMayor from './AIMayor';
 import ShareButton from './ShareButton';
 import SmartAlert from './SmartAlert';
+import FutureVision from './FutureVision';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -216,6 +217,7 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
         <div className="dashboard__radar-card glass">
           <div className="dashboard__radar-title">{t('dashboard.multiDimensional')} {currentYear !== 2024 && `(${currentYear})`}</div>
           <RadarChart impacts={currentResult.impacts} size={320} />
+          <FutureVision scenarioSummary={currentResult.overall_summary} scenarioQuery={result.query} city={result.city || 'Hyderabad'} />
         </div>
       </div>
 

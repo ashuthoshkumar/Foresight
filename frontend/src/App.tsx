@@ -19,13 +19,15 @@ import Leaderboard from './features/community/Leaderboard';
 import DelayRiskPage from './features/delayrisk/DelayRiskPage';
 import Bookmarks from './features/bookmarks/Bookmarks';
 import ButterflyEffect from './features/dashboard/ButterflyEffect';
+import GoalRoadmap from './features/scenario/GoalRoadmap';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
 
 function AppContent() {
   const [view, setView] = useState<View>('home');
   const [currentResult, setCurrentResult] = useState<SimulationResult | null>(null);
   const [comparisonResults, setComparisonResults] = useState<[SimulationResult, SimulationResult] | null>(null);
+  const [goalRoadmapData, setGoalRoadmapData] = useState<any>(null);
   const [history, setHistory] = useState<SimulationResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -88,6 +90,27 @@ function AppContent() {
       setIsSidebarOpen(true);
     }
   }, [i18n.language]);
+
+  const handleGoalSeek = useCallback(async (goal: string, city: string, timeline: string) => {
+    setView('loading');
+    setError(null);
+    setIsSidebarOpen(false);
+
+    try {
+      const response = await api.goalSeek({ goal, city, timeline });
+      if (response && response.roadmap) {
+        setGoalRoadmapData(response.roadmap);
+        setView('goal_roadmap');
+      } else {
+        throw new Error('Goal seek failed');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message);
+      setView('home');
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   const handleCompare = useCallback(async (queryA: string, queryB: string) => {
     setView('loading');
@@ -193,10 +216,14 @@ function AppContent() {
           )}
 
           {(view === 'home' || view === 'compare') && (
-            <ScenarioInput key={view} onSubmit={handleSimulate} onCompare={handleCompare} isLoading={false} initialCompareMode={view === 'compare'} />
+            <ScenarioInput key={view} onSubmit={handleSimulate} onCompare={handleCompare} onGoalSeek={handleGoalSeek} isLoading={false} initialCompareMode={view === 'compare'} />
           )}
 
           {view === 'loading' && <LoadingState />}
+
+          {view === 'goal_roadmap' && goalRoadmapData && (
+            <GoalRoadmap roadmap={goalRoadmapData} onBack={handleBack} />
+          )}
 
           {view === 'dashboard' && currentResult && (
             <Dashboard result={currentResult} onBack={handleBack} />

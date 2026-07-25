@@ -12,6 +12,8 @@ from app.models.scenario import (
     ChatRequest,
     ChatResponse,
     NewspaperRequest,
+    GoalSeekRequest,
+    VisionRequest,
 )
 from app.services.simulation import simulation_engine
 from app.services.llm_service import generate_chat_reply, llm_service
@@ -55,6 +57,35 @@ async def simulate_scenario(
             detail=f"Simulation failed: {str(e)}",
         )
 
+@router.post("/goal-seek")
+async def goal_seek(request: GoalSeekRequest):
+    """
+    Backcast from a future goal to generate a step-by-step roadmap.
+    """
+    try:
+        roadmap = await llm_service.generate_goal_roadmap(
+            goal=request.goal,
+            city=request.city,
+            timeline=request.timeline
+        )
+        return {"roadmap": roadmap}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Goal seek failed: {str(e)}")
+
+@router.post("/vision")
+async def generate_vision(request: VisionRequest):
+    """
+    Generate a future vision image URL and description based on the scenario.
+    """
+    try:
+        result = await llm_service.generate_vision_image(
+            scenario_summary=request.scenario_summary,
+            city=request.city,
+            scenario_query=getattr(request, 'scenario_query', '') or request.scenario_summary,
+        )
+        return {"image_url": result["image_url"], "description": result["description"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Vision generation failed: {str(e)}")
 
 @router.get(
     "/suggestions"

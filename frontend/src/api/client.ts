@@ -73,6 +73,20 @@ export const api = {
   healthCheck: () =>
     request<Record<string, unknown>>('/api/v1/health'),
 
+  /** Backcast from a goal */
+  goalSeek: (data: { goal: string; city: string; timeline: string }) =>
+    request<{ roadmap: any }>('/api/v1/scenarios/goal-seek', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  /** Generate future vision image */
+  generateVision: (scenario_summary: string, city: string, scenario_query?: string) =>
+    request<{ image_url: string; description?: string }>('/api/v1/scenarios/vision', {
+      method: 'POST',
+      body: JSON.stringify({ scenario_summary, city, scenario_query }),
+    }),
+
   /** Auth Register */
   register: (data: Record<string, string>) => 
     request<any>('/api/v1/auth/register', {

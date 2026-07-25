@@ -81,6 +81,35 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
   "overall_score": 0
 }}"""
 
+GOAL_SEEK_PROMPT = """You are Foresight AI — an expert urban strategist and policy planner.
+
+The user is NOT asking "What if?". They have set a strict, ambitious GOAL for their city.
+Your task is to "backcast" from this future goal to the present day, generating a step-by-step roadmap to achieve it.
+
+Goal: "{goal}"
+City: {city}
+Timeline: {timeline}
+
+Respond ONLY with this exact JSON (no markdown, no extra text):
+{{
+  "goal_summary": "2-sentence executive summary of the challenge and approach",
+  "total_estimated_budget": "string (e.g. '$2.5B' or '₹15,000 Cr')",
+  "feasibility_score": 0, // 0-100 based on realism and difficulty
+  "milestones": [
+    {{
+      "year": "string",
+      "title": "Milestone Title",
+      "description": "1-sentence description",
+      "key_policy": "The main policy/law to enact here",
+      "infrastructure_change": "Physical changes to the city"
+    }}
+  ],
+  "major_risks": [
+    "string",
+    "string"
+  ]
+}}"""
+
 
 class LLMService:
     """Wrapper around Google Gemini API for scenario analysis."""
@@ -867,6 +896,176 @@ class LLMService:
         return fallback
 
 
+    async def generate_goal_roadmap(self, goal: str, city: str, timeline: str) -> dict[str, Any]:
+        """Generate a backcasted roadmap for a specific goal."""
+        if not self.is_available:
+            return {
+                "goal_summary": "Fallback roadmap due to missing API key.",
+                "total_estimated_budget": "$0",
+                "feasibility_score": 50,
+                "milestones": [{"year": "2025", "title": "Start", "description": "Initiate.", "key_policy": "None", "infrastructure_change": "None"}],
+                "major_risks": ["No AI available"]
+            }
+        
+        prompt = GOAL_SEEK_PROMPT.format(goal=goal, city=city, timeline=timeline)
+        
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+            "models/gemini-flash-latest",
+        ]
+        
+        for model_name in models_to_try:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.2,
+                        ),
+                    )
+                    return json.loads(response.text)
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if attempt < _MAX_RETRIES and not ("429" in err_str or "quota" in err_str or "resource_exhausted" in err_str):
+                        await asyncio.sleep(_RETRY_DELAY_S)
+                        continue
+                    
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning(f"Model {model_name} unavailable for goal seek, trying next...")
+                        break # Break retry loop, try next model
+                    
+                    if attempt == _MAX_RETRIES:
+                        logger.error(f"Goal seek failed on {model_name}: {e}")
+                        break
+
+        logger.warning("All models failed for goal seek, returning fallback")
+        return {
+            "goal_summary": f"Fallback roadmap for {goal} in {city} by {timeline}. AI quota exceeded.",
+            "total_estimated_budget": "$100M (Est.)",
+            "feasibility_score": 65,
+            "milestones": [
+                {"year": "2025", "title": "Phase 1: Planning", "description": "Initial feasibility studies and pilot programs.", "key_policy": "Establish committee", "infrastructure_change": "Survey zones"},
+                {"year": timeline, "title": "Phase 2: Completion", "description": "Full city-wide implementation of the goal.", "key_policy": "Mandate compliance", "infrastructure_change": "Scale infrastructure"}
+            ],
+            "major_risks": ["Funding delays", "Public resistance due to transition costs"]
+        }
+
+    async def generate_vision_image(self, scenario_summary: str, city: str, scenario_query: str = "") -> dict[str, str]:
+        """Generate a dynamic AI image URL and description based on the scenario."""
+        import urllib.parse
+        
+        # Use the original query if provided, otherwise fall back to summary
+        context = scenario_query if scenario_query else scenario_summary
+        context_lower = context.lower()
+        
+        # Build a highly specific fallback image prompt tied to the actual scenario
+        fallback_prompt = f"Photorealistic aerial view of {city} India in 2030"
+        fallback_description = f"A visualization of {city} after implementing this policy change."
+        
+        if "electric" in context_lower or "ev" in context_lower or "rickshaw" in context_lower:
+            fallback_prompt = f"Photorealistic street view of {city} India with sleek electric auto-rickshaws, EV charging stations on every corner, clean roads with no exhaust smoke, modern LED street lights, clear blue sky, bustling pedestrians, 2030 futuristic"
+            fallback_description = f"The streets of {city} are transformed — silent electric auto-rickshaws glide through clean, smoke-free roads. EV charging stations dot every major intersection, and the air quality has visibly improved with clear blue skies replacing the usual smog."
+        elif "metro" in context_lower or "transit" in context_lower or "train" in context_lower:
+            fallback_prompt = f"Photorealistic view of {city} India with elevated modern metro rail, glass stations, pedestrian plazas below, green corridors alongside tracks, fewer cars on roads, sunset lighting, 2030"
+            fallback_description = f"{city}'s skyline is now defined by sleek elevated metro lines connecting every neighborhood. Below the tracks, car traffic has thinned dramatically, replaced by pedestrian-friendly plazas and cycling lanes."
+        elif "green" in context_lower or "park" in context_lower or "tree" in context_lower:
+            fallback_prompt = f"Photorealistic aerial view of {city} India with massive urban parks, vertical gardens on buildings, tree-lined boulevards, rooftop greenery, clean air, golden hour lighting, 2030"
+            fallback_description = f"A green revolution has swept {city}. Vertical gardens climb the sides of commercial buildings, rooftop farms dot the skyline, and wide tree-lined boulevards have replaced congested roads."
+        elif "water" in context_lower or "flood" in context_lower or "rain" in context_lower:
+            fallback_prompt = f"Photorealistic view of {city} India with smart water management, rain gardens, permeable streets, underground drainage, blue-green infrastructure, clean canals, 2030"
+            fallback_description = f"{city} has conquered its flooding problem. Smart permeable roads absorb rainwater, rain gardens line every street, and a network of clean urban canals now serves as both drainage and recreation."
+        elif "solar" in context_lower or "energy" in context_lower or "renewable" in context_lower:
+            fallback_prompt = f"Photorealistic aerial view of {city} India with solar panels on every rooftop, wind turbines on hills, smart grid towers, clean modern city, bright sunshine, 2030"
+            fallback_description = f"Every rooftop in {city} gleams with solar panels. The city has achieved energy independence — wind turbines spin on the outskirts while a visible smart grid infrastructure powers the entire metropolis cleanly."
+        elif "ban" in context_lower or "petrol" in context_lower or "car" in context_lower or "vehicle" in context_lower:
+            fallback_prompt = f"Photorealistic street of {city} India with no petrol vehicles, only electric buses and cycles, wide pedestrian walkways, clean air, modern architecture, 2030"
+            fallback_description = f"The streets of {city} are unrecognizable — the roar of petrol engines has been replaced by the quiet hum of electric buses. Wide pedestrian walkways and cycling lanes dominate where cars once gridlocked."
+        elif "school" in context_lower or "education" in context_lower:
+            fallback_prompt = f"Photorealistic view of {city} India with modern smart schools, digital classrooms visible through glass walls, children with tablets, green playgrounds, 2030"
+            fallback_description = f"{city}'s education landscape is transformed. Smart schools with glass-walled digital classrooms dot every neighborhood, surrounded by green playgrounds where children learn through augmented reality."
+        else:
+            fallback_prompt = f"Photorealistic aerial view of {city} India as a futuristic smart city, modern architecture, clean streets, smart infrastructure, drone delivery, LED billboards, 2030"
+            fallback_description = f"{city} has undergone a dramatic transformation. Smart infrastructure, clean streets, and modern architecture define the cityscape, with drone delivery systems and intelligent traffic management visible everywhere."
+        
+        # Try AI-generated prompt + description if Gemini is available
+        if self.is_available:
+            models_to_try = [
+                "models/gemini-2.5-flash",
+                "models/gemini-2.0-flash",
+                "models/gemini-2.0-flash-lite",
+            ]
+            for model_name in models_to_try:
+                try:
+                    prompt = (
+                        f"You are a visual futurist. Based on this scenario for {city}, India:\n"
+                        f"Scenario: \"{context[:300]}\"\n\n"
+                        f"Generate TWO things in this EXACT format (no markdown, no extra text):\n"
+                        f"IMAGE_PROMPT: [A vivid 25-40 word comma-separated image generation prompt for a photorealistic concept art showing how {city}'s streets/skyline would SPECIFICALLY look after this policy is implemented. Include the city name, specific infrastructure changes, lighting, atmosphere.]\n"
+                        f"DESCRIPTION: [A 2-3 sentence narrative description explaining what the viewer is seeing in this image and WHY the city looks this way due to the policy change. Be specific to the scenario.]"
+                    )
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(temperature=0.6),
+                    )
+                    text = response.text.strip()
+                    
+                    # Parse the response
+                    if "IMAGE_PROMPT:" in text and "DESCRIPTION:" in text:
+                        parts = text.split("DESCRIPTION:")
+                        img_part = parts[0].replace("IMAGE_PROMPT:", "").strip()
+                        desc_part = parts[1].strip()
+                        if img_part:
+                            fallback_prompt = img_part[:400]
+                        if desc_part:
+                            fallback_description = desc_part[:500]
+                        logger.info(f"Vision prompt+description generated via {model_name}")
+                        break
+                    elif text:
+                        # If format didn't match, use the whole thing as prompt
+                        fallback_prompt = text[:400]
+                        logger.info(f"Vision prompt (raw) generated via {model_name}")
+                        break
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning(f"Model {model_name} unavailable for vision, trying next...")
+                        continue
+                    logger.error(f"Vision error on {model_name}: {e}")
+                    break
+        
+        # Generate deterministic seed from the scenario text
+        seed = sum(ord(c) for c in context) % 100000
+        encoded_prompt = urllib.parse.quote(fallback_prompt)
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=400&nologo=true&seed={seed}"
+        
+        return {"image_url": image_url, "description": fallback_description}
+
+
+async def generate_suggestions_standalone(city: str = "Hyderabad", count: int = 3) -> list:
+    """Module-level helper to generate AI scenario suggestions."""
+    return await llm_service.generate_suggestions(city=city, count=count)
+
+
+async def generate_chat_reply(message: str, scenario_query: str) -> str:
+    """Module-level helper to generate chat reply (wraps LLMService chat)."""
+    return await llm_service.generate_scenario_chat_reply(
+        message=message,
+        scenario_query=scenario_query,
+    )
+
+
+async def generate_butterfly_effect(scenario_query: str, overall_score: float, city: str = "Hyderabad") -> dict:
+    """Generate a causal chain of unintended consequences for a scenario."""
+    return await llm_service.generate_butterfly_chain(
+        scenario_query=scenario_query,
+        overall_score=overall_score,
+        city=city,
+    )
 # ── Module-level singleton and exports ──────────────────────────────────────
 
 llm_service = LLMService()
@@ -927,24 +1126,3 @@ async def generate_chat_reply(scenario_query: str, message: str, history: list) 
     else:
         return f"For '{q}': This scenario has wide-ranging impacts across financial, environmental, and human dimensions. Could you be more specific? For example: costs, health outcomes, risks, or long-term opportunities?"
 
-
-async def generate_suggestions_standalone(city: str = "Hyderabad", count: int = 3) -> list:
-    """Module-level helper to generate AI scenario suggestions."""
-    return await llm_service.generate_suggestions(city=city, count=count)
-
-
-async def generate_chat_reply(message: str, scenario_query: str) -> str:
-    """Module-level helper to generate chat reply (wraps LLMService chat)."""
-    return await llm_service.generate_scenario_chat_reply(
-        message=message,
-        scenario_query=scenario_query,
-    )
-
-
-async def generate_butterfly_effect(scenario_query: str, overall_score: float, city: str = "Hyderabad") -> dict:
-    """Generate a causal chain of unintended consequences for a scenario."""
-    return await llm_service.generate_butterfly_chain(
-        scenario_query=scenario_query,
-        overall_score=overall_score,
-        city=city,
-    )
