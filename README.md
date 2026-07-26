@@ -1,7 +1,21 @@
 # 🔮 Foresight AI (MVP)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Play_Now-blue?style=for-the-badge&logo=vercel)](https://foresight-ten-kappa.vercel.app/)
+
 > **Explore the Future Before It Happens**  
 > Foresight is an MVP (Minimum Viable Product) for an advanced "What If" simulation platform powered by Google Gemini. It allows policymakers, researchers, and citizens to simulate the multi-dimensional impact of policy changes or structural shifts in a rapidly iterating environment.
+
+## 💼 Business Model (Freemium)
+
+The Foresight MVP validates a scalable SaaS business model using Stripe for billing. It operates on a freemium model designed to drive initial adoption while monetizing advanced features:
+
+- **Free Tier (Citizen/Guest)**: Gives users a taste of the simulation engine with strict daily scenario limits. Limits expensive API calls to Gemini and Pollinations AI while providing baseline value.
+- **Pro Tier (Policymaker/Enterprise)**: A $15/month subscription unlocking advanced analytics:
+  - ⚡ Unlimited Scenario Simulations
+  - 🎯 Goal-Seeker & Backcasting Tools
+  - ⚔️ Scenario Battle Mode (A/B testing policies)
+  - 📊 PDF Export & Executive Report Cards
+  - 🏙️ Unrestricted Access to all Regional City Models
 
 ## 🚀 MVP Scope & Features
 
