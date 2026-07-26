@@ -17,22 +17,20 @@ export default function TimelineProjection({ projections, currentYear, onYearCha
 
   useEffect(() => {
     if (isPlaying) {
-      timerRef.current = window.setInterval(() => {
-        onYearChange(prev => {
-          if (prev >= endYear) {
-            setIsPlaying(false);
-            return endYear;
-          }
-          return prev + 1;
-        });
-      }, 800); // 800ms per year jump
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
+      if (currentYear >= endYear) {
+        setIsPlaying(false);
+        return;
+      }
+      
+      timerRef.current = window.setTimeout(() => {
+        onYearChange(currentYear + 1);
+      }, 800);
+      
+      return () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying, endYear, onYearChange]);
+  }, [isPlaying, currentYear, endYear, onYearChange]);
 
   const togglePlay = () => {
     if (!isPlaying && currentYear >= endYear) {
