@@ -44,7 +44,13 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
 
         <button
           className={`sidebar__btn ${currentView === 'battle' ? 'sidebar__btn--active' : ''}`}
-          onClick={() => onViewChange('battle')}
+          onClick={(e) => {
+            if (user && !user.is_admin && user.tier === 'free') {
+              window.dispatchEvent(new CustomEvent('open-paywall'));
+              return;
+            }
+            onViewChange('battle');
+          }}
           style={currentView !== 'battle' ? { background: 'linear-gradient(90deg, rgba(239,68,68,0.05), transparent)' } : { background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(124,58,237,0.2))', borderColor: 'rgba(239,68,68,0.4)' }}
         >
           <span className="sidebar__btn-icon">⚔️</span>
@@ -108,8 +114,17 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
               {user?.name?.charAt(0).toUpperCase() || '👤'}
             </div>
             <div>
-              <div className="sidebar__profile-name">{user?.name || 'User'}</div>
+              <div className="sidebar__profile-name">
+                {user?.name || 'User'}
+                {user?.is_admin && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 6px', background: '#dc2626', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>ADMIN</span>}
+                {!user?.is_admin && user?.tier === 'pro' && <span style={{ marginLeft: '6px', fontSize: '0.65rem', padding: '2px 6px', background: '#fbbf24', color: '#78350f', borderRadius: '4px', fontWeight: 'bold' }}>PRO</span>}
+              </div>
               <div className="sidebar__profile-email">{user?.email || ''}</div>
+              {!user?.is_admin && user?.tier === 'free' && (
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+                  ⚡ {user?.credits_used_today || 0}/3 Free Scenarios
+                </div>
+              )}
             </div>
           </div>
           <button className="sidebar__auth-btn sidebar__auth-btn--logout" onClick={logout}>

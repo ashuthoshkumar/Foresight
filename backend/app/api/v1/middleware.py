@@ -41,6 +41,12 @@ def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depen
                 headers={"WWW-Authenticate": "Bearer"},
             )
             
+        # Ensure backwards compatibility for legacy users
+        if "is_admin" not in user:
+            user["is_admin"] = email == "ashuthoshkumar808@gmail.com"
+        if "tier" not in user:
+            user["tier"] = "free"
+            
         return user
         
     except jwt.ExpiredSignatureError:
@@ -75,3 +81,51 @@ def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depe
         pass
         
     return None
+
+from datetime import datetime, timezone
+
+def verify_credits_or_pro(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+    """Dependency to check if user has credits left or is on Pro/Admin tier."""
+    if current_user.get("is_admin", False) or current_user.get("tier") == "pro":
+        return current_user
+        
+    from app.api.v1.auth import load_users, save_users
+    email = current_user["email"]
+    
+    users = load_users()
+    user = users.get(email)
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+        
+    # Check if we need to reset credits (new day)
+    last_reset = user.get("last_credit_reset")
+    now = datetime.now(timezone.utc)
+    
+    if not last_reset or datetime.fromisoformat(last_reset).date() < now.date():
+        user["credits_used_today"] = 0
+        user["last_credit_reset"] = now.isoformat()
+        
+    # Check if they have credits left
+    credits_used = user.get("credits_used_today", 0)
+    if credits_used >= 3:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Daily free limit reached. Upgrade to Pro for unlimited access."
+        )
+        
+    # Increment credit
+    user["credits_used_today"] = credits_used + 1
+    save_users(users)
+    
+    return user
+
+def verify_pro_or_admin(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+    """Dependency for features strictly limited to Pro users or Admins."""
+    if current_user.get("is_admin", False) or current_user.get("tier") == "pro":
+        return current_user
+        
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="This feature is restricted to Pro users and Admins."
+    )

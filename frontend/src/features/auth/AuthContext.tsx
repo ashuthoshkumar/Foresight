@@ -4,6 +4,9 @@ import { api } from '../../api/client';
 interface User {
   email: string;
   name: string;
+  tier: 'free' | 'pro';
+  is_admin: boolean;
+  credits_used_today?: number;
 }
 
 interface AuthContextType {

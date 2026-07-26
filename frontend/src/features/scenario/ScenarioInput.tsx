@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
+import { useAuth } from '../auth/AuthContext';
 import { api } from '../../api/client';
 import { SUPPORTED_CITIES } from '../scenario/types';
 import './ScenarioInput.css';
@@ -15,6 +16,7 @@ interface ScenarioInputProps {
 
 export default function ScenarioInput({ onSubmit, onCompare, onGoalSeek, isLoading, initialCompareMode = false }: ScenarioInputProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   
   const defaultExamples = useMemo(() => [
     t('home.examples.ex1'),
@@ -208,10 +210,18 @@ export default function ScenarioInput({ onSubmit, onCompare, onGoalSeek, isLoadi
               Simulate
             </button>
             <button 
-              onClick={() => { setIsGoalSeekMode(true); setIsCompareMode(false); }}
+              onClick={(e) => { 
+                e.preventDefault();
+                if (user && !user.is_admin && user.tier === 'free') {
+                  window.dispatchEvent(new CustomEvent('open-paywall'));
+                  return;
+                }
+                setIsGoalSeekMode(true); 
+                setIsCompareMode(false); 
+              }}
               style={{ padding: '8px 16px', borderRadius: '24px', background: isGoalSeekMode ? 'rgba(255,255,255,0.1)' : 'transparent', color: isGoalSeekMode ? '#fff' : 'var(--text-secondary)', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
             >
-              🎯 Goal Seeker
+              🎯 Goal Seeker {!user?.is_admin && user?.tier === 'free' && '🔒'}
             </button>
           </div>
         </div>
@@ -220,19 +230,27 @@ export default function ScenarioInput({ onSubmit, onCompare, onGoalSeek, isLoadi
 
 
       <form className="scenario-input__form" onSubmit={handleSubmit}>
-        {/* City Selector */}
         <div className="scenario-input__city-selector">
-          {SUPPORTED_CITIES.map(city => (
-            <button
-              key={city.key}
-              type="button"
-              className={`scenario-input__city-btn ${selectedCity === city.key ? 'scenario-input__city-btn--active' : ''}`}
-              onClick={() => setSelectedCity(city.key)}
-              disabled={isLoading}
-            >
-              {city.emoji} {t(`cities.${city.key.toLowerCase()}`, city.key)}
-            </button>
-          ))}
+          {SUPPORTED_CITIES.map(city => {
+            const isLocked = !user?.is_admin && user?.tier === 'free' && city.key !== 'Hyderabad';
+            return (
+              <button
+                key={city.key}
+                type="button"
+                className={`scenario-input__city-btn ${selectedCity === city.key ? 'scenario-input__city-btn--active' : ''}`}
+                onClick={() => {
+                  if (isLocked) {
+                    window.dispatchEvent(new CustomEvent('open-paywall'));
+                    return;
+                  }
+                  setSelectedCity(city.key);
+                }}
+                disabled={isLoading}
+              >
+                {city.emoji} {t(`cities.${city.key.toLowerCase()}`, city.key)} {isLocked && '🔒'}
+              </button>
+            );
+          })}
         </div>
 
         {isGoalSeekMode && (

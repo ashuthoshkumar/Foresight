@@ -68,7 +68,12 @@ async def register(req: AuthRequest):
         "email": email,
         "name": req.name,
         "salt": salt,
-        "password": hashed
+        "password": hashed,
+        "tier": "free",
+        "credits_used_today": 0,
+        "last_credit_reset": datetime.now(timezone.utc).isoformat(),
+        "stripe_customer_id": None,
+        "is_admin": email == "ashuthoshkumar808@gmail.com"
     }
     
     save_users(users)
@@ -78,7 +83,12 @@ async def register(req: AuthRequest):
         "success": True, 
         "message": "User registered successfully", 
         "token": token,
-        "user": {"email": email, "name": req.name}
+        "user": {
+            "email": email, 
+            "name": req.name,
+            "tier": "free",
+            "is_admin": email == "ashuthoshkumar808@gmail.com"
+        }
     }
 
 @router.post("/login")
@@ -101,7 +111,12 @@ async def login(req: LoginRequest):
         "success": True, 
         "message": "Login successful", 
         "token": token,
-        "user": {"email": user["email"], "name": user.get("name", "User")}
+        "user": {
+            "email": user["email"], 
+            "name": user.get("name", "User"),
+            "tier": user.get("tier", "free"),
+            "is_admin": user.get("is_admin", user["email"] == "ashuthoshkumar808@gmail.com")
+        }
     }
 
 # This has to be imported here to avoid circular imports
@@ -113,6 +128,9 @@ async def get_me(current_user: Dict[str, Any] = Depends(get_current_user)):
         "success": True,
         "user": {
             "email": current_user["email"],
-            "name": current_user.get("name", "User")
+            "name": current_user.get("name", "User"),
+            "tier": current_user.get("tier", "free"),
+            "is_admin": current_user.get("is_admin", current_user["email"] == "ashuthoshkumar808@gmail.com"),
+            "credits_used_today": current_user.get("credits_used_today", 0)
         }
     }

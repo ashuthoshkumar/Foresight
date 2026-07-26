@@ -69,6 +69,12 @@ export const api = {
   getScenario: (id: string) =>
     request<SimulationResponse>(`/api/v1/scenarios/${id}`),
 
+  /** Verify Stripe session */
+  verifySession: (sessionId: string) =>
+    request<any>(`/api/v1/billing/verify-session?session_id=${sessionId}`, {
+      method: 'POST',
+    }),
+
   /** Health check */
   healthCheck: () =>
     request<Record<string, unknown>>('/api/v1/health'),

@@ -21,6 +21,7 @@ import Bookmarks from './features/bookmarks/Bookmarks';
 import ButterflyEffect from './features/dashboard/ButterflyEffect';
 import GoalRoadmap from './features/scenario/GoalRoadmap';
 import { useVoiceInput } from './hooks/useVoiceInput';
+import PaywallModal from './features/billing/PaywallModal';
 
 type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
 
@@ -69,6 +70,26 @@ function AppContent() {
           }
         })
         .catch(err => console.warn('Could not load shared result:', err));
+    }
+
+    // Handle Stripe checkout return
+    if (params.get('checkout') === 'success') {
+      const isMock = params.get('mock') === 'true';
+      const sessionId = params.get('session_id');
+      
+      const verify = async () => {
+        if (sessionId) {
+          try {
+            await api.verifySession(sessionId);
+          } catch (e) {
+            console.error('Session verification failed:', e);
+          }
+        }
+        alert(isMock ? 'Mock checkout successful! You have been upgraded to the Pro tier for testing.' : 'Upgrade successful! Welcome to Foresight Pro.');
+        window.location.href = window.location.pathname; // Full reload to refresh user context
+      };
+      
+      verify();
     }
   }, []);
 
@@ -397,7 +418,10 @@ function MainApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <MainApp />
+      <>
+        <PaywallModal />
+        <MainApp />
+      </>
     </AuthProvider>
   );
 }

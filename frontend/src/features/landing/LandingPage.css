@@ -6,6 +6,8 @@
   flex-direction: column;
   position: relative;
   z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ── Navbar ─────────────────────────────────────────────── */
@@ -112,8 +114,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--space-3xl) var(--space-lg);
+  justify-content: flex-start;
+  padding: 8vh var(--space-lg) var(--space-3xl);
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;

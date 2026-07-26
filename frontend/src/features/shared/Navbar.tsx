@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../auth/AuthContext';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -8,6 +9,7 @@ interface NavbarProps {
 
 export default function Navbar({ onToggleSidebar, isSidebarOpen = true }: NavbarProps) {
   const { i18n } = useTranslation();
+  const { user } = useAuth();
 
   const LANGS = ['en', 'hi', 'te'];
 
@@ -35,7 +37,30 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen = true }: Navbar
         
         <div className="navbar__spacer"></div>
 
-        <div className="navbar__actions">
+        <div className="navbar__actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {user && !user.is_admin && user.tier === 'free' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                ⚡ {user.credits_used_today || 0}/3 Free Scenarios
+              </span>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('open-paywall'))}
+                style={{
+                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(245,158,11,0.2)'
+                }}
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+          )}
           <div className="navbar__lang-switch">
             <div 
               className="navbar__lang-slider" 

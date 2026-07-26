@@ -18,7 +18,7 @@ from app.models.scenario import (
 from app.services.simulation import simulation_engine
 from app.services.llm_service import generate_chat_reply, llm_service
 from app.services.database import db_service
-from app.api.v1.middleware import get_optional_user, get_current_user
+from app.api.v1.middleware import get_optional_user, get_current_user, verify_credits_or_pro, verify_pro_or_admin
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 )
 async def simulate_scenario(
     request: ScenarioRequest,
-    current_user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+    current_user: Dict[str, Any] = Depends(verify_credits_or_pro)
 ):
     """
     Simulate a "What If" scenario.
@@ -58,7 +58,10 @@ async def simulate_scenario(
         )
 
 @router.post("/goal-seek")
-async def goal_seek(request: GoalSeekRequest):
+async def goal_seek(
+    request: GoalSeekRequest,
+    current_user: Dict[str, Any] = Depends(verify_pro_or_admin)
+):
     """
     Backcast from a future goal to generate a step-by-step roadmap.
     """
@@ -73,7 +76,10 @@ async def goal_seek(request: GoalSeekRequest):
         raise HTTPException(status_code=500, detail=f"Goal seek failed: {str(e)}")
 
 @router.post("/vision")
-async def generate_vision(request: VisionRequest):
+async def generate_vision(
+    request: VisionRequest,
+    current_user: Dict[str, Any] = Depends(verify_pro_or_admin)
+):
     """
     Generate a future vision image URL and description based on the scenario.
     """

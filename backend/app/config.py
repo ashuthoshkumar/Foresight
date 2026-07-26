@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "your-super-secret-key-change-in-production"
     jwt_expiry_minutes: int = 1440 # 24 hours
 
+    # Stripe
+    stripe_secret_key: str = "sk_test_mock_key"
+    stripe_webhook_secret: str = "whsec_mock_secret"
+    frontend_url: str = "http://localhost:5173"
+
     @property
     def cors_origin_list(self) -> list[str]:
         """Parse CORS origins from comma-separated string."""

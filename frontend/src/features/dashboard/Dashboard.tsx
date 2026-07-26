@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../auth/AuthContext';
 import type { SimulationResult } from '../scenario/types';
 import RadarChart from './RadarChart';
 import ImpactCard from './ImpactCard';
@@ -27,6 +28,8 @@ interface DashboardProps {
 
 export default function Dashboard({ result, onBack }: DashboardProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isLocked = !user?.is_admin && user?.tier === 'free';
   const [isExporting, setIsExporting] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isGeneratingNewspaper, setIsGeneratingNewspaper] = useState(false);
@@ -122,6 +125,10 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
             <button
               className={`dashboard__export-btn ${isExporting ? 'dashboard__export-btn--loading' : ''}`}
               onClick={async () => {
+                if (isLocked) {
+                  window.dispatchEvent(new CustomEvent('open-paywall'));
+                  return;
+                }
                 setIsExporting(true);
                 try {
                   await exportToPDF(result);
@@ -131,11 +138,15 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               }}
               disabled={isExporting || isGeneratingImage}
             >
-              {isExporting ? '⏳ Generating...' : '📤 Export PDF'}
+              {isExporting ? '⏳ Generating...' : '📤 Export PDF'} {isLocked && '🔒'}
             </button>
             <button
               className={`dashboard__export-btn dashboard__export-btn--image ${isGeneratingImage ? 'dashboard__export-btn--loading' : ''}`}
               onClick={async () => {
+                if (isLocked) {
+                  window.dispatchEvent(new CustomEvent('open-paywall'));
+                  return;
+                }
                 setIsGeneratingImage(true);
                 try {
                   await exportImage('foresight-report-card', `foresight-scenario-${Date.now()}.png`);
@@ -145,7 +156,7 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               }}
               disabled={isGeneratingImage || isExporting}
             >
-              {isGeneratingImage ? '📸 Capturing...' : '📸 Share Card'}
+              {isGeneratingImage ? '📸 Capturing...' : '📸 Share Card'} {isLocked && '🔒'}
             </button>
             <button 
               className={`dashboard__export-btn dashboard__export-btn--news ${isGeneratingNewspaper ? 'dashboard__export-btn--loading' : ''}`}
