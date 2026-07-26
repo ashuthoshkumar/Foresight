@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import './Sidebar.css';
 
 interface SidebarProps {
-  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly';
+  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
   onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly') => void;
   historyCount: number;
   isOpen?: boolean;
