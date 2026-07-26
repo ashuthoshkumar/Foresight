@@ -75,6 +75,12 @@ export const api = {
       method: 'POST',
     }),
 
+  /** Start Stripe checkout */
+  checkoutSession: () =>
+    request<{ url: string }>('/api/v1/billing/checkout-session', {
+      method: 'POST',
+    }),
+
   /** Health check */
   healthCheck: () =>
     request<Record<string, unknown>>('/api/v1/health'),

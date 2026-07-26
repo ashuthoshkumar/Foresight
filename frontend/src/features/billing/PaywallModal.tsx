@@ -17,15 +17,7 @@ export default function PaywallModal() {
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
-      // Assuming api client has a checkout method. If not, standard fetch
-      const token = localStorage.getItem('foresight_token');
-      const res = await fetch('http://127.0.0.1:8000/api/v1/billing/checkout-session', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
+      const data = await api.checkoutSession();
       if (data.url) {
         window.location.href = data.url;
       } else {
