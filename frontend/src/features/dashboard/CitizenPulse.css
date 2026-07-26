@@ -1,0 +1,142 @@
+.citizen-pulse {
+  margin-top: 2rem;
+}
+
+.citizen-pulse__header {
+  margin-bottom: 1.25rem;
+}
+
+.citizen-pulse__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.3rem 0;
+}
+
+.citizen-pulse__icon {
+  font-size: 1.4rem;
+}
+
+.citizen-pulse__subtitle {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.citizen-pulse__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.citizen-pulse__card {
+  position: relative;
+  background: rgba(30, 41, 59, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  animation: citizenSlideIn 0.5s ease forwards;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.citizen-pulse__card:hover {
+  transform: translateY(-3px);
+  border-color: var(--impact-color, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes citizenSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.citizen-pulse__impact-strip {
+  height: 3px;
+  width: 100%;
+}
+
+.citizen-pulse__card-content {
+  padding: 1rem 1.15rem 1rem;
+}
+
+.citizen-pulse__persona-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.citizen-pulse__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.citizen-pulse__persona-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.citizen-pulse__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.citizen-pulse__meta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+.citizen-pulse__quote {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0 0 0.85rem 0;
+  padding: 0.65rem 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--impact-color, rgba(255, 255, 255, 0.1));
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+}
+
+.citizen-pulse__impact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .citizen-pulse__grid {
+    grid-template-columns: 1fr;
+  }
+}
