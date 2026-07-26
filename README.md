@@ -1,60 +1,58 @@
-# 🔮 Foresight AI Decision Engine
+# 🔮 Foresight AI (MVP)
 
 > **Explore the Future Before It Happens**  
-> Foresight is an advanced "What If" simulation platform powered by Google Gemini and real-time public datasets. It allows policymakers, researchers, and citizens to simulate the multi-dimensional impact of policy changes or structural shifts.
+> Foresight is an MVP (Minimum Viable Product) for an advanced "What If" simulation platform powered by Google Gemini. It allows policymakers, researchers, and citizens to simulate the multi-dimensional impact of policy changes or structural shifts in a rapidly iterating environment.
 
-## ✨ Features
+## 🚀 MVP Scope & Features
 
-Foresight goes far beyond basic LLM chatbots by integrating verifiable data, interactive visualizations, and deep multi-dimensional analysis.
+This repository represents the initial Minimum Viable Product. It is designed to prove the core concept of AI-driven policy simulation, integrating live AI inference with interactive visualizations and a functional monetization flow.
 
-- **🎯 Goal-Seeker (Backcasting)**: Instead of "What If", set a massive future goal (e.g. "Zero traffic fatalities by 2030") and the AI will reverse-engineer a step-by-step policy and infrastructure roadmap to achieve it.
-- **📸 Future Vision Camera**: Automatically generates a highly specific, unique, photorealistic AI image of what the city streets will actually look like based on the simulated policy changes (powered by Pollinations AI & Gemini).
-- **🌐 Multi-Dimensional Impact Analysis**: Simulates impact across 5 critical axes: Financial, Environmental, Human, Risk, and Opportunity.
-- **⚔️ Scenario Battle Mode**: Pit two competing scenarios against each other (e.g. "Ban Petrol Cars" vs. "Make Public Transport Free") to see which wins across different metrics.
-- **🗺️ Live City Impact Map**: An interactive, animated map (built with Leaflet) visualizing the localized impact on different city zones.
-- **🕸️ Interactive Knowledge Graph**: Visually trace the exact data sources, datasets, and relationships grounding the AI's decisions.
-- **🏆 Community Leaderboard**: Discover, rank, and instantly run the most impactful scenarios explored by other users.
-- **📊 Smart Report Cards & PDF Export**: Instantly generate high-quality, shareable 1200x630 social media cards or comprehensive PDF reports for any scenario.
-- **🎙️ AI Voice Dictation**: Hands-free scenario input using the Web Speech API.
-- **🌍 Full Localization**: Native UI and AI analysis support for English, Hindi (हिंदी), and Telugu (తెలుగు).
+### Core MVP Features
+- **🎯 Scenario Simulation Engine**: Core "What If" logic powered by Google Gemini (`gemini-2.5-flash`) mapping user scenarios to multi-dimensional impact scores.
+- **💳 Live Monetization (Stripe)**: End-to-end integration with Stripe Checkout to gate premium features (Pro Tier).
+- **📸 Future Vision Camera (Demo)**: AI-generated images of simulated policy changes using Pollinations AI.
+- **🗺️ Interactive Dashboards**: Visualizing impact via Recharts (Radar/Line charts) and React-Leaflet maps.
+- **⚔️ Battle Mode & Goal-Seeker**: Initial implementations of comparative analysis and backcasting.
+- **🌍 Localization**: Base infrastructure for English, Hindi, and Telugu support.
 
-## 🚀 Tech Stack
+## 🏗️ MVP Tech Stack
 
-### Frontend
+### Frontend (Vercel)
 - **Framework**: React 18 with Vite
-- **Styling**: Vanilla CSS with custom glassmorphism design system
-- **Visualizations**: Recharts (Radar/Line charts), React-Leaflet (Maps), React-Force-Graph-2D (Knowledge Graph)
-- **Utilities**: html2canvas (Image Export), jsPDF (PDF Export), react-i18next (Localization)
+- **Styling**: Vanilla CSS (Glassmorphism design system for fast iteration)
+- **Visualizations**: Recharts, React-Leaflet, React-Force-Graph-2D
 
-### Backend
+### Backend (Render)
 - **Framework**: FastAPI (Python)
-- **AI/LLM**: Google Gemini (`models/gemini-2.5-flash`) via `google-genai` SDK
-- **Architecture**: Async RESTful APIs with strict Pydantic data validation and structured JSON generation.
+- **AI/LLM**: Google Gemini via `google-genai` SDK
+- **Billing**: Stripe Checkout & Webhooks
+- **Database**: Ephemeral SQLite / JSON for rapid MVP iteration (to be migrated to PostgreSQL in V2)
 
-## 🛠️ Getting Started
+## 🛠️ Running the MVP Locally
 
 ### Prerequisites
 - Node.js (v18+)
 - Python (v3.9+)
-- A Google Gemini API Key
+- Google Gemini API Key
+- Stripe Test Secret Key
 
 ### 1. Backend Setup
 
 ```bash
 cd backend
 python -m venv venv
-# On Windows: venv\Scripts\activate
-# On Mac/Linux: source venv/bin/activate
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
 
 pip install -r requirements.txt
 
-# Create a .env file and add your Gemini API Key
-echo "GEMINI_API_KEY=your_api_key_here" > .env
+# Create .env based on the template
+cp .env.template .env
+# Fill in GEMINI_API_KEY and STRIPE_SECRET_KEY in .env
 
-# Start the FastAPI server
 python -m uvicorn app.main:app --reload
 ```
-*Backend runs on `http://localhost:8000`*
+*API runs on `http://localhost:8000`*
 
 ### 2. Frontend Setup
 
@@ -65,14 +63,12 @@ npm install
 # Start the Vite dev server
 npm run dev
 ```
-*Frontend runs on `http://localhost:5173`*
+*App runs on `http://localhost:5173`*
 
-## 💡 How It Works
-1. **Input**: A user dictates or types a scenario (e.g., "What if Hyderabad doubled its metro network?").
-2. **Knowledge Retrieval**: The backend maps the query to existing datasets in the Knowledge Graph.
-3. **Simulation Engine**: Google Gemini processes the scenario constraints against the verified data.
-4. **Structured Output**: The AI strictly returns a Pydantic-validated JSON structure containing scores and detailed metrics.
-5. **Visualization**: The frontend parses the structured data to render Maps, Radar Charts, and timeline projections.
+## 🛣️ Post-MVP Roadmap
+- **Database Migration**: Move from SQLite/JSON to a managed PostgreSQL database (e.g., Supabase/Neon).
+- **Authentication**: Implement robust JWT/OAuth authentication instead of local storage tokens.
+- **Real-time Data Hooks**: Connect to live city APIs (Traffic, AQI) for grounded simulations.
 
 ---
 *Built with ❤️ for a smarter, data-driven future.*
