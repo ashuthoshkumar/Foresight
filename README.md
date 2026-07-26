@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Play_Now-blue?style=for-the-badge&logo=vercel)](https://foresight-ten-kappa.vercel.app/)
 
 > **Explore the Future Before It Happens**  
-> Foresight is an MVP (Minimum Viable Product) for an advanced "What If" simulation platform powered by Google Gemini. It allows policymakers, researchers, and citizens to simulate the multi-dimensional impact of policy changes or structural shifts in a rapidly iterating environment.
+> Foresight is an AI-powered "What If" simulation platform that helps users analyze the potential impact of policy changes and strategic decisions. Powered by Google Gemini, it delivers predictive insights, interactive visualizations, and scenario comparisons to support smarter, data-driven decision-making.
 
 ## 💼 Business Model (Freemium)
 
