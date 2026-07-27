@@ -24,6 +24,7 @@ export default function ScenarioInput({ onSubmit, onCompare, onGoalSeek, isLoadi
     t('home.examples.ex3'),
     t('home.examples.ex4'),
     t('home.examples.ex5'),
+    t('home.examples.ex6'),
   ], [t]);
 
   const PLACEHOLDER_TEXTS = useMemo(() => [
