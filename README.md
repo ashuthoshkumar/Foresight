@@ -28,6 +28,15 @@ This repository represents the initial Minimum Viable Product. It is designed to
 - **🗺️ Interactive Dashboards**: Visualizing impact via Recharts (Radar/Line charts) and React-Leaflet maps.
 - **⚔️ Battle Mode & Goal-Seeker**: Initial implementations of comparative analysis and backcasting.
 - **🌍 Localization**: Base infrastructure for English, Hindi, and Telugu support.
+## ✨ Key Highlights
+
+- 🤖 AI-driven scenario prediction using Google Gemini
+- 📊 Interactive data visualization with Recharts
+- 🌍 Multi-language support (English, Hindi & Telugu)
+- 💳 Secure Stripe-based subscription management
+- 📍 Regional policy comparison with interactive maps
+- ⚡ Fast frontend built using React + Vite
+- 🔒 Scalable backend powered by FastAPIs
 
 ## 🏗️ MVP Tech Stack
 
