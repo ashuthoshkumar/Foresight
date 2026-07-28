@@ -22,12 +22,13 @@ The Foresight MVP validates a scalable SaaS business model using Stripe for bill
 This repository represents the initial Minimum Viable Product. It is designed to prove the core concept of AI-driven policy simulation, integrating live AI inference with interactive visualizations and a functional monetization flow.
 
 ### Core MVP Features
-- **🎯 Scenario Simulation Engine**: Core "What If" logic powered by Google Gemini (`gemini-2.5-flash`) mapping user scenarios to multi-dimensional impact scores.
-- **💳 Live Monetization (Stripe)**: End-to-end integration with Stripe Checkout to gate premium features (Pro Tier).
-- **📸 Future Vision Camera (Demo)**: AI-generated images of simulated policy changes using Pollinations AI.
-- **🗺️ Interactive Dashboards**: Visualizing impact via Recharts (Radar/Line charts) and React-Leaflet maps.
-- **⚔️ Battle Mode & Goal-Seeker**: Initial implementations of comparative analysis and backcasting.
-- **🌍 Localization**: Base infrastructure for English, Hindi, and Telugu support.
+- **🎯 Scenario Simulation Engine**: Leverages Google Gemini 2.5 Flash to evaluate "What If" policy and decision scenarios, generating multi-dimensional impact analysis across economic, social, environmental, and governance metrics.
+- **💳 Live Monetization (Stripe)**: Seamless Stripe Checkout integration enabling secure subscriptions and feature gating for the Pro tier with a production-ready payment flow.
+- **📸 Future Vision Camera (Demo)**: Generates AI-powered visualizations of simulated policy outcomes using Pollinations AI, helping users intuitively understand potential future scenarios.
+- **🗺️ Interactive Dashboards**: Rich, real-time data visualizations built with Recharts and React Leaflet, featuring radar charts, trend analysis, and geographic impact mapping.
+- **⚔️ Battle Mode & Goal-Seeker**: Compare multiple scenarios side-by-side and leverage AI-driven backcasting to identify the optimal path toward desired policy or development goals.
+- **🌍 Localization**: Built-in localization framework supporting English, Hindi, and Telugu, making the platform accessible to a broader audience.
+
 ## ✨ Key Highlights
 
 - 🤖 AI-driven scenario prediction using Google Gemini
