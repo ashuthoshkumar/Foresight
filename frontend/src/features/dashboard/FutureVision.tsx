@@ -63,7 +63,7 @@ export default function FutureVision({ scenarioSummary, scenarioQuery, city }: F
   };
 
   return (
-    <div style={{ borderRadius: '16px', overflow: 'hidden', position: 'relative', marginTop: '2rem', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <div style={{ borderRadius: '16px', overflow: 'hidden', position: 'relative', marginTop: '0', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.08)', height: '100%' }}>
       {isLocked && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>

@@ -212,6 +212,7 @@ class LLMService:
         kg_data: Optional[dict[str, Any]] = None,
         language: str = "en",
         city: str = "Hyderabad",
+        live_aqi: Optional[dict[str, Any]] = None,
     ) -> dict[str, Any]:
         """Single combined LLM call: interpretation + impact analysis together."""
         if not self.is_available:
@@ -222,6 +223,9 @@ class LLMService:
             kg_section = f"Knowledge Graph Data (use these EXACT numbers, mark source 'knowledge_graph'):\n{json.dumps(kg_data, indent=2, default=str)}"
         else:
             kg_section = "No Knowledge Graph data available. Use directional estimates (mark source 'llm_estimate')."
+
+        if live_aqi:
+            kg_section += f"\n\nLive Meteorological API Data (use these real-time baseline values instead of defaults, mark source 'knowledge_graph'):\n{json.dumps(live_aqi, indent=2, default=str)}"
 
         if language and language.lower() != "en":
             kg_section += f"\n\nIMPORTANT: Translate ALL text fields (summaries, metric names, explanations) to language: {language}"

@@ -158,6 +158,16 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  /** Get all users (Admin only) */
+  getAdminUsers: () => request<{ success: boolean; users: any[] }>('/api/v1/auth/admin/users'),
+
+  /** Upgrade/downgrade user tier (Admin only) */
+  upgradeUser: (email: string, tier: string) =>
+    request<{ success: boolean; message: string }>('/api/v1/auth/admin/upgrade', {
+      method: 'POST',
+      body: JSON.stringify({ email, tier }),
+    }),
+
   /** Translate a simulation result */
   translate: (result: any, language: string) =>
     request<{ success: boolean; result: any }>('/api/v1/scenarios/translate', {

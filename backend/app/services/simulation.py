@@ -73,12 +73,21 @@ class SimulationEngine:
             )
             logger.info("KG calculations complete for %s in %s", vehicle_type, city_name)
 
-        # ── Step 4: Single combined LLM call ──
+        # ── Step 4: Single combined LLM call with live AQI context ──
+        live_aqi_context = None
+        if city_name:
+            try:
+                from app.services.live_api import fetch_live_aqi
+                live_aqi_context = fetch_live_aqi(city_name)
+            except Exception as e:
+                logger.warning("Failed to fetch live AQI context: %s", e)
+
         llm_analysis = await llm_service.analyze_scenario_combined(
             query=query,
             kg_data=kg_calculations,
             language=language,
             city=city_name,
+            live_aqi=live_aqi_context,
         )
 
         domain = llm_analysis.get("domain", domain)

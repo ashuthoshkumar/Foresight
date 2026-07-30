@@ -19,6 +19,7 @@ import AIMayor from './AIMayor';
 import ShareButton from './ShareButton';
 import SmartAlert from './SmartAlert';
 import FutureVision from './FutureVision';
+import CityVisualizer from './CityVisualizer';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -225,11 +226,48 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
         <div className="dashboard__summary-text">{currentResult.overall_summary}</div>
       </div>
 
-      {/* Radar Chart */}
-      <div className="dashboard__radar-section">
-        <div className="dashboard__radar-card glass">
+      {/* Visual Analytics Row: Radar Chart & City Visualizer side-by-side */}
+      <div className="dashboard__visualization-grid">
+        <div className="dashboard__radar-card glass" style={{ margin: 0, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div className="dashboard__radar-title">{t('dashboard.multiDimensional')} {currentYear !== 2024 && `(${currentYear})`}</div>
-          <RadarChart impacts={currentResult.impacts} size={320} />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, padding: '1rem 0' }}>
+            <RadarChart impacts={currentResult.impacts} size={320} />
+          </div>
+        </div>
+        <div className="dashboard__visualizer-card" style={{ height: '100%' }}>
+          <CityVisualizer result={currentResult} />
+        </div>
+      </div>
+
+      {/* Future & SDG Alignment Row: SDG alignment card & Future Vision side-by-side */}
+      <div className="dashboard__alignment-grid">
+        <div className="dashboard__summary glass" style={{ marginBottom: 0, padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.2rem', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>🎯</span>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Sustainable Development Goals (SDG) Target Alignment</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', flex: 1, justifyContent: 'center' }}>
+            <div className="sdg-alignment-item" style={{ borderLeft: '3px solid #fd6925', paddingLeft: '1rem' }}>
+              <h4 style={{ color: '#fd6925', fontWeight: 700, fontSize: '0.95rem', marginBottom: '4px', marginTop: 0 }}>SDG 9: Industry, Innovation & Infrastructure</h4>
+              <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px', marginTop: 0 }}>
+                Target 9.4: By 2030, upgrade infrastructure and retrofit industries to make them sustainable.
+              </p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                <strong>Foresight Causal Check:</strong> Tripling EV charging station infrastructure scales power grid support structures, accelerating emission-free public transit and vehicle logistics.
+              </p>
+            </div>
+            <div className="sdg-alignment-item" style={{ borderLeft: '3px solid #f99d25', paddingLeft: '1rem' }}>
+              <h4 style={{ color: '#f99d25', fontWeight: 700, fontSize: '0.95rem', marginBottom: '4px', marginTop: 0 }}>SDG 11: Sustainable Cities & Communities</h4>
+              <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px', marginTop: 0 }}>
+                Target 11.6: By 2030, reduce the adverse per capita environmental impact of cities, including air quality.
+              </p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                <strong>Foresight Causal Check:</strong> Policies targeting EV transport and emission bans directly lower city PM2.5/PM10 pollutant volumes and enhance clean metropolitan environments.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="dashboard__vision-card" style={{ height: '100%' }}>
           <FutureVision scenarioSummary={currentResult.overall_summary} scenarioQuery={result.query} city={result.city || 'Hyderabad'} />
         </div>
       </div>

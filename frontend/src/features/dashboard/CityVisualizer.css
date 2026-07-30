@@ -1,0 +1,96 @@
+/* ── City Visualizer CSS ────────────────────────────────────────── */
+
+.city-visualizer {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;           /* header on top, canvas below */
+  cursor: crosshair;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.city-visualizer:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.1);
+}
+
+/* ── Header: title + stat pills — sits ABOVE the canvas ── */
+.city-visualizer__header {
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(4, 5, 20, 0.6);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.city-visualizer__header h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.visualizer-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.stat-label {
+  color: var(--text-tertiary);
+}
+
+.stat-value {
+  font-weight: 700;
+}
+
+/* ── Canvas wrapper: contains the canvas and the hint tag ── */
+.city-visualizer__canvas-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 16, 0.4);
+  min-height: 230px;
+}
+
+.city-visualizer canvas {
+  display: block;
+  width: 380px;
+  height: 230px;
+}
+
+/* ── Interactive hint tag at bottom of canvas ── */
+.city-visualizer__interactive-tag {
+  position: absolute;
+  bottom: 8px;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  background: rgba(4, 5, 16, 0.8);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  letter-spacing: 0.02em;
+}

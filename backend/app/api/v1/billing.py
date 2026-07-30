@@ -110,13 +110,15 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
         subscription = event['data']['object']
         customer_id = subscription.get('customer')
         
-        # Find user by customer_id and downgrade
+        # Find all users by customer_id and downgrade
         users = load_users()
+        downgraded_any = False
         for email, user in users.items():
             if user.get('stripe_customer_id') == customer_id:
                 user['tier'] = 'free'
-                save_users(users)
+                downgraded_any = True
                 print(f"Downgraded user {email} to FREE via Stripe webhook")
-                break
+        if downgraded_any:
+            save_users(users)
 
     return {"status": "success"}

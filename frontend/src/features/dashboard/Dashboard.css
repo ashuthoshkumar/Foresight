@@ -352,3 +352,24 @@
 .dashboard__export-btn--rect {
   border-radius: var(--radius-md) !important;
 }
+
+/* ── Visualization and Alignment Grids (Equal Height Rows) ── */
+.dashboard__visualization-grid,
+.dashboard__alignment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  align-items: stretch;
+}
+
+.dashboard__visualizer-card,
+.dashboard__vision-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__visualizer-card > .city-visualizer {
+  height: 100%;
+  flex: 1;
+}

@@ -3,8 +3,8 @@ import { useAuth } from '../auth/AuthContext';
 import './Sidebar.css';
 
 interface SidebarProps {
-  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
-  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly') => void;
+  currentView: 'home' | 'history' | 'compare' | 'compare_dashboard' | 'dashboard' | 'loading' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap' | 'admin_dashboard';
+  onViewChange: (view: 'home' | 'history' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'admin_dashboard') => void;
   historyCount: number;
   isOpen?: boolean;
 }
@@ -105,6 +105,17 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
           <span className="sidebar__btn-icon">🕸️</span>
           <span>{t('nav.graph', 'Knowledge Graph')}</span>
         </button>
+
+        {user?.is_admin && (
+          <button
+            className={`sidebar__btn ${currentView === 'admin_dashboard' ? 'sidebar__btn--active' : ''}`}
+            onClick={() => onViewChange('admin_dashboard')}
+            style={{ background: 'linear-gradient(90deg, rgba(16,185,129,0.06), transparent)', borderLeft: currentView === 'admin_dashboard' ? '3px solid #10b981' : 'none' }}
+          >
+            <span className="sidebar__btn-icon">🛡️</span>
+            <span style={{ fontWeight: 600, color: '#10b981' }}>{t('nav.adminPanel', 'Admin Panel')}</span>
+          </button>
+        )}
       </nav>
       
       <div className="sidebar__footer">

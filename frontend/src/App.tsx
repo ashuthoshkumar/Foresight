@@ -22,8 +22,9 @@ import ButterflyEffect from './features/dashboard/ButterflyEffect';
 import GoalRoadmap from './features/scenario/GoalRoadmap';
 import { useVoiceInput } from './hooks/useVoiceInput';
 import PaywallModal from './features/billing/PaywallModal';
+import AdminDashboard from './features/admin/AdminDashboard';
 
-type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap';
+type View = 'home' | 'history' | 'dashboard' | 'loading' | 'compare_dashboard' | 'compare' | 'knowledge_graph' | 'battle' | 'leaderboard' | 'delay_risk' | 'bookmarks' | 'butterfly' | 'goal_roadmap' | 'admin_dashboard';
 
 function AppContent() {
   const [view, setView] = useState<View>('home');
@@ -357,6 +358,10 @@ function AppContent() {
               setView('dashboard');
               setIsSidebarOpen(false);
             }} />
+          )}
+
+          {view === 'admin_dashboard' && (
+            <AdminDashboard />
           )}
 
           {view === 'butterfly' && (

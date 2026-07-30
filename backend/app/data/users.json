@@ -1,74 +1,46 @@
 {
   "ashuthoshkumar808@gmail.com": {
     "email": "ashuthoshkumar808@gmail.com",
-    "name": "ashuthosh",
-    "salt": "2bac493c16ab3ff17a771e46964be5d2",
-    "password": "783e97c2667f1ce0c4c0fcebf8cc50f549e3c21089480b7bdd216815a1e12988"
+    "name": "Admin Ashuthosh",
+    "salt": "d3b9bcd3460b3c6acb432641ce6d561c",
+    "password": "523b6bf4f016b75776bbd2cdbc221292b61756bc380dd2d7e4af43a41bcf510f",
+    "tier": "free",
+    "credits_used_today": 0,
+    "last_credit_reset": "2026-07-30T13:18:43.740355+00:00",
+    "stripe_customer_id": null,
+    "is_admin": true
   },
-  "freeuser_lixbgb@test.com": {
-    "email": "freeuser_lixbgb@test.com",
+  "freeuser_mafghg@test.com": {
+    "email": "freeuser_mafghg@test.com",
     "name": "Free Tester",
-    "salt": "80759794d7f45821938230545475471c",
-    "password": "02ed62a1c545dc9b13c5c7d2972590767e309980ba92a6177c5ec3d5fc3ed04b",
+    "salt": "858af923dc8058e0183e317b3f7c1d2a",
+    "password": "2d29eb825aac1f28aae7cc97caa97d25281db46b2a329c353afbf4c2a03862c7",
     "tier": "free",
     "credits_used_today": 3,
-    "last_credit_reset": "2026-07-26T05:32:15.064785+00:00",
+    "last_credit_reset": "2026-07-30T13:18:43.756015+00:00",
     "stripe_customer_id": null,
     "is_admin": false
   },
-  "prouser_lixbgb@test.com": {
-    "email": "prouser_lixbgb@test.com",
+  "prouser_mafghg@test.com": {
+    "email": "prouser_mafghg@test.com",
     "name": "Pro Tester",
-    "salt": "3f706b78ecbaa0e2a6d312a37077a470",
-    "password": "3ecf32156b6247418315f645caa3fc3107f7d05b72248b1de611cf357ad71938",
+    "salt": "d7fed89c038f913588f758991da1c4f1",
+    "password": "1833c645bd669b1610ecc5106a5bccacde7fc4e17b56ef13199ece5ab693a705",
     "tier": "free",
     "credits_used_today": 0,
-    "last_credit_reset": "2026-07-26T05:32:15.092594+00:00",
+    "last_credit_reset": "2026-07-30T13:18:43.777652+00:00",
     "stripe_customer_id": "cus_test_mock_123",
     "is_admin": false
   },
-  "freeuser_onghru@test.com": {
-    "email": "freeuser_onghru@test.com",
-    "name": "Free Tester",
-    "salt": "dd0b719af030da9d499cbc1299aaeada",
-    "password": "f414f8d21ce34139557306d1731d29c6385f29ba356a883ba4a170f120b023d1",
+  "pravalikakonda01@gmail.com": {
+    "email": "pravalikakonda01@gmail.com",
+    "name": "pravalikaaaaa",
+    "salt": "c2ffea7af1de27bb81b52e61f713f66e",
+    "password": "0d8594e76c4840bb7d88e96a756ce46ca9abba4e003f8d934c9aeade7b9b1775",
     "tier": "free",
-    "credits_used_today": 3,
-    "last_credit_reset": "2026-07-26T05:37:25.730743+00:00",
+    "credits_used_today": 1,
+    "last_credit_reset": "2026-07-30T13:25:34.655086+00:00",
     "stripe_customer_id": null,
-    "is_admin": false
-  },
-  "prouser_onghru@test.com": {
-    "email": "prouser_onghru@test.com",
-    "name": "Pro Tester",
-    "salt": "f3d06cc3a5add0ec444741c252fb0dcd",
-    "password": "9cf1fb8c4639200df8c2676053aefcef2f894a1a0d6380b84b419d91ab888ccf",
-    "tier": "pro",
-    "credits_used_today": 0,
-    "last_credit_reset": "2026-07-26T05:37:25.745024+00:00",
-    "stripe_customer_id": "cus_test_mock_123",
-    "is_admin": false
-  },
-  "pravalikakonda05@gmail.com": {
-    "email": "pravalikakonda05@gmail.com",
-    "name": "pravalika",
-    "salt": "7e56cee41c9594120ce3db0d9e7bd177",
-    "password": "cb66a3cabb63e180b26c3ca332e881a6dbab3d51b9e72f5bfc6c07bb8136c12d",
-    "tier": "pro",
-    "credits_used_today": 0,
-    "last_credit_reset": "2026-07-26T09:30:20.093342+00:00",
-    "stripe_customer_id": "mock_cus_pravalikakonda05@gmail.com",
-    "is_admin": false
-  },
-  "bhanuprakash@gmail.com": {
-    "email": "bhanuprakash@gmail.com",
-    "name": "bhanu",
-    "salt": "0456026bc807040b498e034b73293306",
-    "password": "3cace5c356acc7f5398aee713be98afe7af96ed5d62fad397ec4b858baefd440",
-    "tier": "pro",
-    "credits_used_today": 0,
-    "last_credit_reset": "2026-07-26T10:00:19.173903+00:00",
-    "stripe_customer_id": "cus_UxJhyrMz6oIHJN",
     "is_admin": false
   }
 }
