@@ -348,3 +348,7 @@
   border-color: rgba(251, 191, 36, 0.5) !important;
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
 }
+
+.dashboard__export-btn--rect {
+  border-radius: var(--radius-md) !important;
+}

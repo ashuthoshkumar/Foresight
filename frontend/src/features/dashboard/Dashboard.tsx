@@ -123,24 +123,6 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               {t('dashboard.newScenario')}
             </button>
             <button
-              className={`dashboard__export-btn ${isExporting ? 'dashboard__export-btn--loading' : ''}`}
-              onClick={async () => {
-                if (isLocked) {
-                  window.dispatchEvent(new CustomEvent('open-paywall'));
-                  return;
-                }
-                setIsExporting(true);
-                try {
-                  await exportToPDF(result);
-                } finally {
-                  setIsExporting(false);
-                }
-              }}
-              disabled={isExporting || isGeneratingImage}
-            >
-              {isExporting ? '⏳ Generating...' : '📤 Export PDF'} {isLocked && '🔒'}
-            </button>
-            <button
               className={`dashboard__export-btn dashboard__export-btn--image ${isGeneratingImage ? 'dashboard__export-btn--loading' : ''}`}
               onClick={async () => {
                 if (isLocked) {
@@ -173,6 +155,24 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
               title={isBookmarked ? 'Remove bookmark' : 'Bookmark this scenario'}
             >
               {isTogglingBookmark ? '⏳' : isBookmarked ? '⭐' : '☆'} {isBookmarked ? 'Saved' : 'Save'}
+            </button>
+            <button
+              className={`dashboard__export-btn dashboard__export-btn--rect ${isExporting ? 'dashboard__export-btn--loading' : ''}`}
+              onClick={async () => {
+                if (isLocked) {
+                  window.dispatchEvent(new CustomEvent('open-paywall'));
+                  return;
+                }
+                setIsExporting(true);
+                try {
+                  await exportToPDF(result);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+              disabled={isExporting || isGeneratingImage}
+            >
+              {isExporting ? '⏳ Generating...' : '📤 Export PDF'} {isLocked && '🔒'}
             </button>
           </div>
           <div className="dashboard__query-label">{t('dashboard.scenarioAnalyzed')}</div>
