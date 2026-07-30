@@ -179,6 +179,8 @@ export default function Dashboard({ result, onBack }: DashboardProps) {
           <h2 className="dashboard__query-text">{currentResult.query}</h2>
           <div className="dashboard__meta">
             <span className="dashboard__meta-domain">{domainLabel}</span>
+            <span className="dashboard__meta-domain" style={{ background: 'rgba(253, 105, 37, 0.15)', borderColor: 'rgba(253, 105, 37, 0.3)', color: '#fd6925', fontWeight: 600 }} title="SDG 9: Industry, Innovation and Infrastructure">🎯 SDG 9</span>
+            <span className="dashboard__meta-domain" style={{ background: 'rgba(249, 157, 37, 0.15)', borderColor: 'rgba(249, 157, 37, 0.3)', color: '#f99d25', fontWeight: 600 }} title="SDG 11: Sustainable Cities and Communities">🎯 SDG 11</span>
             {result.city && (
               <span className="dashboard__meta-item">📍 {result.city}</span>
             )}

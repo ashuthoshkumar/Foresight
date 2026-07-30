@@ -30,6 +30,8 @@ export default function ReportCard({ result, id = 'foresight-report-card' }: Rep
         </div>
         <div className="report-card__meta">
           <span>{result.domain}</span>
+          <span style={{ color: '#fd6925', fontWeight: 600 }}>SDG 9</span>
+          <span style={{ color: '#f99d25', fontWeight: 600 }}>SDG 11</span>
           <span>•</span>
           <span>{new Date(result.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
         </div>
