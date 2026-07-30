@@ -50,7 +50,6 @@ export default function ButterflyEffect({ scenarioQuery, overallScore, city, def
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isLoading, setIsLoading] = useState(false);
   const [nodes, setNodes] = useState<ButterflyNode[]>([]);
-  const [links, setLinks] = useState<ButterflyLink[]>([]);
   const [rawGraphData, setRawGraphData] = useState<{nodes: any[], links: any[]} | null>(null);
   const [hoveredNode, setHoveredNode] = useState<ButterflyNode | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -139,7 +138,6 @@ export default function ButterflyEffect({ scenarioQuery, overallScore, city, def
     nodesRef.current = positioned;
     linksRef.current = positionedLinks;
     setNodes(positioned);
-    setLinks(positionedLinks);
     timeRef.current = 0;
   }, []);
 

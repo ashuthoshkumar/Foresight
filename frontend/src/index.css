@@ -3,48 +3,48 @@
 /* ── Design Tokens ──────────────────────────────────────────── */
 
 :root {
-  /* Colors — Deep space palette */
-  --bg-primary: #050816;
-  --bg-secondary: #0a0e27;
-  --bg-tertiary: #111336;
-  --bg-card: rgba(17, 19, 54, 0.6);
-  --bg-glass: rgba(17, 19, 54, 0.4);
-  --bg-glass-hover: rgba(17, 19, 54, 0.7);
+  /* Colors — Deep space green/purple palette */
+  --bg-primary: #040510;
+  --bg-secondary: #0a0c20;
+  --bg-tertiary: #121430;
+  --bg-card: rgba(18, 12, 38, 0.5);
+  --bg-glass: rgba(18, 12, 38, 0.35);
+  --bg-glass-hover: rgba(18, 12, 38, 0.6);
 
-  /* Accent gradient */
-  --accent-primary: #00d4ff;
-  --accent-secondary: #7c3aed;
-  --accent-tertiary: #06b6d4;
+  /* Accent colors */
+  --accent-primary: #10b981;    /* Neon Green */
+  --accent-secondary: #a855f7;  /* Neon Purple */
+  --accent-tertiary: #00d4ff;   /* Neon Cyan */
   --accent-warm: #f59e0b;
   --accent-success: #10b981;
   --accent-danger: #ef4444;
   --accent-pink: #ec4899;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
-  --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #7c3aed 50%, #ec4899 100%);
+  --gradient-primary: linear-gradient(135deg, #10b981 0%, #a855f7 100%);
+  --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #a855f7 50%, #10b981 100%);
   --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-  --gradient-card: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(124, 58, 237, 0.08) 100%);
-  --gradient-border: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(124, 58, 237, 0.3));
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #00d4ff 100%);
+  --gradient-card: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(168, 85, 247, 0.06) 100%);
+  --gradient-border: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(168, 85, 247, 0.25));
 
   /* Text */
   --text-primary: #f0f0ff;
   --text-secondary: #a0a3c4;
   --text-tertiary: #6b6f96;
-  --text-accent: #00d4ff;
+  --text-accent: #10b981;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-light: rgba(255, 255, 255, 0.1);
-  --border-accent: rgba(0, 212, 255, 0.3);
+  --border-accent: rgba(16, 185, 129, 0.3);
 
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.15);
-  --shadow-glow-lg: 0 0 40px rgba(0, 212, 255, 0.2);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+  --shadow-glow-lg: 0 0 40px rgba(16, 185, 129, 0.2);
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -236,8 +236,8 @@ input, textarea {
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.1); }
+  0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(168, 85, 247, 0.2); }
 }
 
 @keyframes shimmer {

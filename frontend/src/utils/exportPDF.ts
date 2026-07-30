@@ -44,15 +44,19 @@ const CAT_ICON: Record<string, string> = {
 
 // Replace special Unicode chars with ASCII-safe equivalents for Latin-1 jsPDF fonts
 function sanitize(text: string): string {
-  return text
+  const step1 = text
     .replace(/\u20b9|\u20a8/g, 'Rs.')  // rupee signs
     .replace(/\u2014|\u2015/g, ' - ')  // em dash
     .replace(/\u2013/g, '-')            // en dash
     .replace(/\u2026/g, '...')          // ellipsis
     .replace(/\u00d7/g, 'x')            // multiplication sign
     .replace(/\u2019|\u2018/g, "'")     // curly apostrophes
-    .replace(/\u201c|\u201d/g, '"')    // curly quotes
-    .replace(/[^\x00-\xFF]/g, '')       // strip remaining non-Latin-1
+    .replace(/\u201c|\u201d/g, '"');    // curly quotes
+  
+  // Strip remaining non-Latin-1 characters without triggering regex control warnings
+  const step2 = [...step1].filter(c => c.charCodeAt(0) <= 255).join('');
+  
+  return step2
     .replace(/  +/g, ' ')               // collapse multiple spaces
     .trim();
 }
@@ -66,9 +70,6 @@ function scoreColor(score: number): readonly [number, number, number] {
 
 function setFill(doc: jsPDF, c: readonly [number, number, number]) {
   doc.setFillColor(c[0], c[1], c[2]);
-}
-function setDraw(doc: jsPDF, c: readonly [number, number, number]) {
-  doc.setDrawColor(c[0], c[1], c[2]);
 }
 function setColor(doc: jsPDF, c: readonly [number, number, number]) {
   doc.setTextColor(c[0], c[1], c[2]);

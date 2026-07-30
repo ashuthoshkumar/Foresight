@@ -19,8 +19,8 @@
   align-items: center;
   gap: 6px;
   padding: 6px 16px;
-  background: rgba(0, 212, 255, 0.08);
-  border: 1px solid rgba(0, 212, 255, 0.15);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
   border-radius: var(--radius-full);
   font-size: 0.78rem;
   font-weight: 500;
@@ -73,7 +73,7 @@
   inset: -1px;
   border-radius: inherit;
   padding: 1.5px;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(124, 58, 237, 0.3), rgba(0, 212, 255, 0.3));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(168, 85, 247, 0.3), rgba(16, 185, 129, 0.3));
   background-size: 200% 200%;
   animation: shimmer 3s linear infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -158,7 +158,7 @@
 
 .scenario-input__submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
 }
 
 .scenario-input__submit:active {
@@ -252,7 +252,7 @@
 }
 
 .scenario-input__example:hover {
-  background: rgba(0, 212, 255, 0.08);
+  background: rgba(16, 185, 129, 0.08);
   border-color: var(--border-accent);
   color: var(--accent-primary);
   transform: translateY(-1px);
@@ -288,18 +288,18 @@
 }
 
 .scenario-input__city-btn:hover {
-  border-color: rgba(6, 182, 212, 0.3);
-  background: rgba(6, 182, 212, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.08);
   color: var(--text-primary);
   transform: translateY(-1px);
 }
 
 .scenario-input__city-btn--active {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(124, 58, 237, 0.2));
-  border-color: rgba(6, 182, 212, 0.5);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(168, 85, 247, 0.2));
+  border-color: rgba(16, 185, 129, 0.5);
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
 }
 
 .scenario-input__city-btn:disabled {

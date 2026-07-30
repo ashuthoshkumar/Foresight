@@ -101,15 +101,15 @@ export default function RadarChart({ impacts, impactsB, size = 300 }: RadarChart
           gradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)'); // Amber
           gradient.addColorStop(1, 'rgba(245, 158, 11, 0.05)');
         } else {
-          gradient.addColorStop(0, 'rgba(0, 212, 255, 0.25)'); // Cyan/Blue
-          gradient.addColorStop(0.5, 'rgba(124, 58, 237, 0.15)');
-          gradient.addColorStop(1, 'rgba(0, 212, 255, 0.05)');
+          gradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Neon Green
+          gradient.addColorStop(0.5, 'rgba(168, 85, 247, 0.15)'); // Neon Purple
+          gradient.addColorStop(1, 'rgba(16, 185, 129, 0.05)');
         }
         ctx.fillStyle = gradient;
         ctx.fill();
 
         // Border
-        ctx.strokeStyle = isSecondary ? 'rgba(245, 158, 11, 0.6)' : 'rgba(0, 212, 255, 0.6)';
+        ctx.strokeStyle = isSecondary ? 'rgba(245, 158, 11, 0.6)' : 'rgba(16, 185, 129, 0.6)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -123,7 +123,7 @@ export default function RadarChart({ impacts, impactsB, size = 300 }: RadarChart
           // Glow
           ctx.beginPath();
           ctx.arc(x, y, 6, 0, Math.PI * 2);
-          ctx.fillStyle = isSecondary ? 'rgba(245, 158, 11, 0.2)' : 'rgba(0, 212, 255, 0.2)';
+          ctx.fillStyle = isSecondary ? 'rgba(245, 158, 11, 0.2)' : 'rgba(16, 185, 129, 0.2)';
           ctx.fill();
 
           // Point

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './LoadingState.css';
 
+const STEPS_COUNT = 5;
+
 export default function LoadingState() {
   const { t } = useTranslation();
   
@@ -17,7 +19,7 @@ export default function LoadingState() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveStep(prev => (prev < STEPS.length - 1 ? prev + 1 : prev));
+      setActiveStep(prev => (prev < STEPS_COUNT - 1 ? prev + 1 : prev));
     }, 2200);
     return () => clearInterval(interval);
   }, []);

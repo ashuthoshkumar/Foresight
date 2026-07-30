@@ -49,7 +49,7 @@ export default function FutureVision({ scenarioSummary, scenarioQuery, city }: F
       mounted = false;
       clearTimeout(timer);
     };
-  }, [scenarioSummary, city]);
+  }, [scenarioSummary, city, scenarioQuery, isLocked]);
 
   // When the image actually loads in the browser, reveal it
   const handleImageLoad = () => {

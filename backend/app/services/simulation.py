@@ -108,6 +108,7 @@ class SimulationEngine:
                 "domain": domain,
                 "city": city_name,
                 "kg_available": kg_calculations is not None,
+                "language": language,
             },
             domain=domain,
             city=city_name,

@@ -110,6 +110,17 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
   ]
 }}"""
 
+TRANSLATE_RESULT_PROMPT = """You are a professional translator.
+Translate ALL user-facing text values (such as 'overall_summary', 'summary', 'metric', 'explanation', 'name', 'occupation', 'quote') in the provided JSON to the target language: {language}.
+
+CRITICAL REQUIREMENTS:
+1. Do NOT translate any JSON keys. Keep keys exactly as they are.
+2. Do NOT translate technical or internal values like 'category' (e.g. keep 'environmental', 'financial', etc.), 'confidence', 'data_source', 'id', 'timestamp', or 'sentiment'.
+3. Keep all numbers, scores, and structures exactly the same.
+4. Ensure the output is valid JSON matching the exact schema of the input.
+5. Translate the user query itself ('query') if appropriate, or keep it.
+"""
+
 
 class LLMService:
     """Wrapper around Google Gemini API for scenario analysis."""
@@ -156,30 +167,44 @@ class LLMService:
         if not self.is_available:
             return self._fallback_interpret(query)
 
-        for attempt in range(1, _MAX_RETRIES + 1):
-            try:
-                response = self._client.models.generate_content(
-                    model=self._model_name,
-                    contents=SCENARIO_INTERPRETER_PROMPT + f'\n\nUser scenario: "{query}"',
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.1,
-                    ),
-                )
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
 
-                result = json.loads(response.text)
-                logger.info("Scenario interpreted: domain=%s, action=%s", result.get("domain"), result.get("action"))
-                return result
+        for model_name in models_to_try:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents=SCENARIO_INTERPRETER_PROMPT + f'\n\nUser scenario: "{query}"',
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.1,
+                        ),
+                    )
 
-            except Exception as e:
-                is_quota = "quota" in str(e).lower() or "429" in str(e) or "resource_exhausted" in str(e).lower()
-                if is_quota and attempt < _MAX_RETRIES:
-                    wait = _RETRY_DELAY_S * attempt
-                    logger.warning("Rate limit hit on interpretation (attempt %d/%d), retrying in %ds...", attempt, _MAX_RETRIES, wait)
-                    await asyncio.sleep(wait)
-                    continue
-                logger.error("LLM interpretation failed after %d attempt(s): %s", attempt, e)
-                return self._fallback_interpret(query)
+                    result = json.loads(response.text)
+                    logger.info("Scenario interpreted via %s: domain=%s, action=%s", model_name, result.get("domain"), result.get("action"))
+                    return result
+
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if attempt < _MAX_RETRIES and not ("429" in err_str or "quota" in err_str or "resource_exhausted" in err_str):
+                        await asyncio.sleep(_RETRY_DELAY_S)
+                        continue
+                    
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning("Model %s unavailable for interpretation, trying next...", model_name)
+                        break
+                    
+                    if attempt == _MAX_RETRIES:
+                        logger.error("LLM interpretation failed on %s: %s", model_name, e)
+                        break
+
+        logger.warning("All models failed for interpretation, returning fallback")
+        return self._fallback_interpret(query)
 
     async def analyze_scenario_combined(
         self,
@@ -203,30 +228,44 @@ class LLMService:
 
         prompt = COMBINED_ANALYSIS_PROMPT.format(query=query, kg_section=kg_section, city=city)
 
-        for attempt in range(1, _MAX_RETRIES + 1):
-            try:
-                response = self._client.models.generate_content(
-                    model=self._model_name,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.2,
-                        max_output_tokens=3072,
-                    ),
-                )
-                result = json.loads(response.text)
-                logger.info("Combined analysis done: score=%s domain=%s city=%s", result.get("overall_score"), result.get("domain"), city)
-                return result
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
 
-            except Exception as e:
-                is_quota = "quota" in str(e).lower() or "429" in str(e) or "resource_exhausted" in str(e).lower()
-                if is_quota and attempt < _MAX_RETRIES:
-                    wait = _RETRY_DELAY_S * attempt
-                    logger.warning("Rate limit hit (attempt %d/%d), retrying in %ds...", attempt, _MAX_RETRIES, wait)
-                    await asyncio.sleep(wait)
-                    continue
-                logger.error("Combined analysis failed after %d attempt(s): %s", attempt, e)
-                return self._fallback_analysis(query, kg_data, language, city=city)
+        for model_name in models_to_try:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.2,
+                            max_output_tokens=3072,
+                        ),
+                    )
+                    result = json.loads(response.text)
+                    logger.info("Combined analysis done via %s: score=%s domain=%s city=%s", model_name, result.get("overall_score"), result.get("domain"), city)
+                    return result
+
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if attempt < _MAX_RETRIES and not ("429" in err_str or "quota" in err_str or "resource_exhausted" in err_str):
+                        await asyncio.sleep(_RETRY_DELAY_S)
+                        continue
+                    
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning("Model %s unavailable for combined analysis, trying next...", model_name)
+                        break
+                    
+                    if attempt == _MAX_RETRIES:
+                        logger.error("Combined analysis failed on %s: %s", model_name, e)
+                        break
+
+        logger.warning("All models failed for combined analysis, returning fallback")
+        return self._fallback_analysis(query, kg_data, language, city=city)
 
 
     async def generate_impact_analysis(
@@ -275,31 +314,91 @@ class LLMService:
                 f"\n\n## Language Requirement\nIMPORTANT: Translate ALL output text (including summaries, category names, metric names, and explanations) into the following language code/name: {language}. Return valid JSON."
             )
 
-        for attempt in range(1, _MAX_RETRIES + 1):
-            try:
-                response = self._client.models.generate_content(
-                    model=self._model_name,
-                    contents="\n".join(context_parts),
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.3,
-                        max_output_tokens=2048,
-                    ),
-                )
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
 
-                result = json.loads(response.text)
-                logger.info("Impact analysis generated via Gemini: overall_score=%s", result.get("overall_score"))
-                return result
+        for model_name in models_to_try:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents="\n".join(context_parts),
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.3,
+                            max_output_tokens=2048,
+                        ),
+                    )
 
-            except Exception as e:
-                is_quota = "quota" in str(e).lower() or "429" in str(e) or "resource_exhausted" in str(e).lower()
-                if is_quota and attempt < _MAX_RETRIES:
-                    wait = _RETRY_DELAY_S * attempt
-                    logger.warning("⚠️  Rate limit hit on analysis (attempt %d/%d), retrying in %ds...", attempt, _MAX_RETRIES, wait)
-                    await asyncio.sleep(wait)
-                    continue
-                logger.error("LLM analysis failed after %d attempt(s): %s", attempt, e)
-                return self._fallback_analysis(query, kg_data, language)
+                    result = json.loads(response.text)
+                    logger.info("Impact analysis generated via %s: overall_score=%s", model_name, result.get("overall_score"))
+                    return result
+
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if attempt < _MAX_RETRIES and not ("429" in err_str or "quota" in err_str or "resource_exhausted" in err_str):
+                        await asyncio.sleep(_RETRY_DELAY_S)
+                        continue
+                    
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning("Model %s unavailable for impact analysis, trying next...", model_name)
+                        break
+                    
+                    if attempt == _MAX_RETRIES:
+                        logger.error("LLM analysis failed on %s: %s", model_name, e)
+                        break
+
+        logger.warning("All models failed for impact analysis, returning fallback")
+        return self._fallback_analysis(query, kg_data, language)
+
+    async def translate_result(self, result: dict[str, Any], target_language: str) -> dict[str, Any]:
+        """
+        Translate user-facing text fields in a simulation result JSON to target_language using Gemini.
+        """
+        if not self.is_available:
+            return result
+
+        prompt = TRANSLATE_RESULT_PROMPT.format(language=target_language) + f"\n\nJSON to translate:\n{json.dumps(result, ensure_ascii=False)}"
+
+        models_to_try = [
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-2.0-flash-lite",
+        ]
+
+        for model_name in models_to_try:
+            for attempt in range(1, _MAX_RETRIES + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.1,
+                        ),
+                    )
+                    translated = json.loads(response.text)
+                    logger.info("Simulation result translated to %s via %s", target_language, model_name)
+                    return translated
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if attempt < _MAX_RETRIES and not ("429" in err_str or "quota" in err_str or "resource_exhausted" in err_str):
+                        await asyncio.sleep(_RETRY_DELAY_S)
+                        continue
+                    
+                    if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str or "404" in err_str:
+                        logger.warning("Model %s unavailable for translation, trying next...", model_name)
+                        break
+                    
+                    if attempt == _MAX_RETRIES:
+                        logger.error("Translation failed on %s: %s", model_name, e)
+                        break
+
+        logger.warning("All models failed for translation, returning untranslated result")
+        return result
 
     # ── Fallback Responses (when API key is not set) ────────────
 

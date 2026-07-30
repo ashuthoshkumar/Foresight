@@ -157,4 +157,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  /** Translate a simulation result */
+  translate: (result: any, language: string) =>
+    request<{ success: boolean; result: any }>('/api/v1/scenarios/translate', {
+      method: 'POST',
+      body: JSON.stringify({ result, language }),
+    }),
 };

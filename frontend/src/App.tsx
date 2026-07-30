@@ -93,6 +93,80 @@ function AppContent() {
     }
   }, []);
 
+  // Trigger translation when user changes language
+  useEffect(() => {
+    if (!currentResult) return;
+    
+    const currentLang = currentResult.parameters_used?.language || 'en';
+    const targetLang = i18n.language;
+    
+    if (currentLang !== targetLang) {
+      setView('loading');
+      api.translate(currentResult, targetLang)
+        .then(res => {
+          if (res.success && res.result) {
+            const updatedResult = {
+              ...res.result,
+              parameters_used: {
+                ...res.result.parameters_used,
+                language: targetLang
+              }
+            };
+            setCurrentResult(updatedResult);
+          }
+          setView('dashboard');
+        })
+        .catch(err => {
+          console.error('Translation failed:', err);
+          setView('dashboard');
+        });
+    }
+  }, [i18n.language, currentResult]);
+
+  // Trigger translation for comparison results
+  const compIdA = comparisonResults?.[0]?.id;
+  const compIdB = comparisonResults?.[1]?.id;
+
+  useEffect(() => {
+    if (!comparisonResults) return;
+    
+    const resA = comparisonResults[0];
+    const resB = comparisonResults[1];
+    const currentLangA = resA.parameters_used?.language || 'en';
+    const currentLangB = resB.parameters_used?.language || 'en';
+    const targetLang = i18n.language;
+    
+    if (currentLangA !== targetLang || currentLangB !== targetLang) {
+      setView('loading');
+      Promise.all([
+        currentLangA !== targetLang ? api.translate(resA, targetLang) : Promise.resolve({ success: true, result: resA }),
+        currentLangB !== targetLang ? api.translate(resB, targetLang) : Promise.resolve({ success: true, result: resB })
+      ]).then(([rA, rB]) => {
+        if (rA.success && rA.result && rB.success && rB.result) {
+          const updatedA = {
+            ...rA.result,
+            parameters_used: {
+              ...rA.result.parameters_used,
+              language: targetLang
+            }
+          };
+          const updatedB = {
+            ...rB.result,
+            parameters_used: {
+              ...rB.result.parameters_used,
+              language: targetLang
+            }
+          };
+          setComparisonResults([updatedA, updatedB]);
+        }
+        setView('compare_dashboard');
+      }).catch(err => {
+        console.error('Comparison translation failed:', err);
+        setView('compare_dashboard');
+      });
+    }
+  }, [i18n.language, compIdA, compIdB, comparisonResults]);
+
   const handleSimulate = useCallback(async (query: string) => {
     setView('loading');
     setError(null);

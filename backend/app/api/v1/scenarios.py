@@ -297,3 +297,26 @@ async def generate_butterfly(request: ButterflyRequest):
             status_code=500,
             detail=f"Failed to generate butterfly effect: {str(e)}",
         )
+
+
+class TranslateRequest(BaseModel):
+    result: dict[str, Any]
+    language: str
+
+
+@router.post(
+    "/translate",
+    responses={500: {"model": ErrorResponse}},
+)
+async def translate_scenario(request: TranslateRequest):
+    """
+    Translate a simulation result into the target language.
+    """
+    try:
+        translated = await llm_service.translate_result(request.result, request.language)
+        return {"success": True, "result": translated}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Translation failed: {str(e)}",
+        )

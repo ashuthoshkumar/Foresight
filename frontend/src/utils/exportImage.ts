@@ -8,10 +8,6 @@ export async function exportImage(elementId: string, filename: string = 'foresig
   }
 
   try {
-    // Temporarily make the element visible if it was hidden via absolute positioning off-screen
-    const originalLeft = element.style.left;
-    const originalPosition = element.style.position;
-    
     // We don't want to show it on screen, so just ensure it's rendered.
     // Usually, position: absolute; left: -9999px is enough for html2canvas to still capture it,
     // as long as display is NOT 'none'.

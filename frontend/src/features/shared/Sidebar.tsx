@@ -44,14 +44,14 @@ export default function Sidebar({ currentView, onViewChange, historyCount, isOpe
 
         <button
           className={`sidebar__btn ${currentView === 'battle' ? 'sidebar__btn--active' : ''}`}
-          onClick={(e) => {
+          onClick={() => {
             if (user && !user.is_admin && user.tier === 'free') {
               window.dispatchEvent(new CustomEvent('open-paywall'));
               return;
             }
             onViewChange('battle');
           }}
-          style={currentView !== 'battle' ? { background: 'linear-gradient(90deg, rgba(239,68,68,0.05), transparent)' } : { background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(124,58,237,0.2))', borderColor: 'rgba(239,68,68,0.4)' }}
+          style={currentView !== 'battle' ? { background: 'linear-gradient(90deg, rgba(239,68,68,0.05), transparent)' } : { background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(168,85,247,0.2))', borderColor: 'rgba(239,68,68,0.4)' }}
         >
           <span className="sidebar__btn-icon">⚔️</span>
           <span style={{ fontWeight: 700, color: '#f87171' }}>{t('nav.battle', 'Battle Mode')}</span>

@@ -11,6 +11,12 @@ import random
 import string
 import os
 import shutil
+import io
+
+# Force UTF-8 encoding on Windows to prevent UnicodeEncodeError on emojis
+if sys.platform.startswith('win'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 BASE = "http://127.0.0.1:8000/api/v1"
 
