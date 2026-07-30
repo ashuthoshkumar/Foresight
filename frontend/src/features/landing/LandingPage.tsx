@@ -63,16 +63,31 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
           <div className="landing__glass-card landing__glass-card--center glass">
             <div className="landing__card-icon">📊</div>
             <h3>Knowledge Graph</h3>
-            <p>Grounded in verifiable datasets, not just hallucinations.</p>
+            <p>Grounded in verifiable datasets, preventing typical AI hallucinations.</p>
           </div>
           <div className="landing__glass-card landing__glass-card--right glass">
             <div className="landing__card-icon">⚖️</div>
             <h3>Compare Impacts</h3>
-            <p>Run A/B tests on the future to find the most optimal path.</p>
+            <p>Run A/B tests on scenarios to identify the most optimal path forward.</p>
+          </div>
+          <div className="landing__glass-card landing__glass-card--left glass" style={{ animationDelay: '0.3s' }}>
+            <div className="landing__card-icon">🏙️</div>
+            <h3>3D Digital Twins</h3>
+            <p>Canvas-based 3D isometric city twins mapping AQI density & EV grids.</p>
+          </div>
+          <div className="landing__glass-card landing__glass-card--center glass" style={{ animationDelay: '0.4s' }}>
+            <div className="landing__card-icon">🎯</div>
+            <h3>UN SDG Alignment</h3>
+            <p>Rigorous automated mapping directly onto UN Targets 9.4 and 11.6.</p>
+          </div>
+          <div className="landing__glass-card landing__glass-card--right glass" style={{ animationDelay: '0.5s' }}>
+            <div className="landing__card-icon">📡</div>
+            <h3>Live API Grounding</h3>
+            <p>Real-time weather, air index, and transit parameters loaded on every run.</p>
           </div>
         </div>
       </main>
-      
+
       <footer className="landing__footer">
         <span style={{ opacity: 0.6 }}>
           Foresight AI Decision Engine — Powered by Gemini + Knowledge Graph
