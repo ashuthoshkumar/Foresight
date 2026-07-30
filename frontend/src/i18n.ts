@@ -30,7 +30,8 @@ const resources = {
           ex2: 'What if all auto-rickshaws in Hyderabad became electric?',
           ex3: 'What if Hyderabad doubled its metro network by 2028?',
           ex4: 'What if EV charging stations tripled in Hyderabad next year?',
-          ex5: 'What if Hyderabad imposed congestion pricing in the city center?'
+          ex5: 'What if Hyderabad imposed congestion pricing in the city center?',
+          ex6: 'What if Hyderabad became a 100% electric vehicle city by 2035?'
         },
         generateIdeas: 'Generate Ideas',
         placeholders: {
@@ -185,7 +186,8 @@ const resources = {
           ex2: 'क्या हो अगर हैदराबाद में सभी ऑटो-रिक्शा इलेक्ट्रिक हो जाएं?',
           ex3: 'क्या हो अगर हैदराबाद 2028 तक अपने मेट्रो नेटवर्क को दोगुना कर दे?',
           ex4: 'क्या हो अगर अगले साल हैदराबाद में ईवी चार्जिंग स्टेशन तीन गुना हो जाएं?',
-          ex5: 'क्या हो अगर हैदराबाद सिटी सेंटर में कंजेशन प्राइसिंग लागू करे?'
+          ex5: 'क्या हो अगर हैदराबाद सिटी सेंटर में कंजेशन प्राइसिंग लागू करे?',
+          ex6: 'क्या हो अगर हैदराबाद 2035 तक 100% इलेक्ट्रिक वाहन शहर बन जाए?'
         },
         generateIdeas: 'विचार उत्पन्न करें',
         placeholders: {
@@ -318,7 +320,8 @@ const resources = {
           ex2: 'హైదరాబాద్‌లోని అన్ని ఆటో-రిక్షాలు ఎలక్ట్రిక్‌గా మారితే ఏమి జరుగుతుంది?',
           ex3: 'హైదరాబాద్ 2028 నాటికి తన మెట్రో నెట్‌వర్క్‌ను రెట్టింపు చేస్తే ఏమి జరుగుతుంది?',
           ex4: 'వచ్చే ఏడాది హైదరాబాద్‌లో EV ఛార్జింగ్ స్టేషన్లు మూడు రెట్లు పెరిగితే ఏమి జరుగుతుంది?',
-          ex5: 'హైదరాబాద్ సిటీ సెంటర్‌లో రద్దీ ధరలను విధిస్తే ఏమి జరుగుతుంది?'
+          ex5: 'హైదరాబాద్ సిటీ సెంటర్‌లో రద్దీ ధరలను విధిస్తే ఏమి జరుగుతుంది?',
+          ex6: 'హైదరాబాద్ 2035 నాటికి 100% ఎలక్ట్రిక్ వాహన నగరం అయినట్లయితే ఏమి జరుగుతుంది?'
         },
         generateIdeas: 'ఆలోచనలను రూపొందించండి',
         placeholders: {
